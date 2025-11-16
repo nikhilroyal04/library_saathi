@@ -172,8 +172,8 @@ export default async function SubdomainPage({
               <h3 className="text-xl font-semibold mb-2">Secure & Reliable</h3>
               <p className="text-gray-600">Your data is safe with our secure system</p>
             </div>
-          </div>
         </div>
+      </div>
       </section>
     </div>
   );

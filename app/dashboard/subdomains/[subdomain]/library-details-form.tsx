@@ -172,49 +172,6 @@ export default function LibraryDetailsForm({
           </CardContent>
         </Card>
 
-        <Card className="border-blue-200 bg-blue-50/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="w-5 h-5 text-blue-600" />
-              Custom Domain
-            </CardTitle>
-            <CardDescription>
-              Connect your own domain (e.g., tenant.vikrantrathi.com). This will point to your subdomain.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="customDomain">Custom Domain</Label>
-              <Input
-                id="customDomain"
-                name="customDomain"
-                type="text"
-                placeholder="tenant.vikrantrathi.com"
-                defaultValue={initialData.customDomain}
-              />
-              <div className="space-y-2 text-xs text-gray-600">
-                <p className="font-medium">Steps to setup custom domain:</p>
-                <ol className="list-decimal list-inside space-y-1 ml-2">
-                  <li>Enter your custom domain above (without http:// or https://)</li>
-                  <li>Save this form</li>
-                  <li>Add CNAME record in your DNS provider:
-                    <br />
-                    <code className="text-xs bg-white px-2 py-1 rounded border mt-1 inline-block">
-                      {initialData.customDomain || 'tenant.vikrantrathi.com'} → CNAME → {subdomain}.{rootDomain}
-                    </code>
-                  </li>
-                  <li>If using Vercel, also add this domain in Vercel Dashboard → Settings → Domains</li>
-                  <li>Wait 5-60 minutes for DNS propagation</li>
-                </ol>
-                <p className="text-xs text-gray-500 mt-2">
-                  Example: If your custom domain is <code>tenant.vikrantrathi.com</code> and subdomain is <code>rathi.jyotilok.com</code>, 
-                  add CNAME: <code>tenant.vikrantrathi.com → rathi.jyotilok.com</code>
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {state?.error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
             {state.error}
