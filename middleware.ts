@@ -38,19 +38,29 @@ export async function middleware(request: NextRequest) {
   
   // First, check if this is a custom domain (different from root domain)
   // Custom domain check should happen BEFORE normal subdomain detection
-  if (!cleanHostname.includes(cleanRootDomain) && cleanHostname !== cleanRootDomain) {
+  // Check custom domain if hostname doesn't match root domain pattern
+  const isRootDomain = cleanHostname === cleanRootDomain || cleanHostname === `www.${cleanRootDomain}`;
+  const isSubdomainOfRoot = cleanHostname.endsWith(`.${cleanRootDomain}`) && cleanHostname !== cleanRootDomain;
+  
+  if (!isRootDomain && !isSubdomainOfRoot) {
     // This might be a custom domain - check in Redis
     try {
       const customDomainSubdomain = await getSubdomainFromCustomDomain(cleanHostname);
       if (customDomainSubdomain) {
         subdomain = customDomainSubdomain;
         
+        // Log in both development and production for debugging
+        console.log('[Middleware] Custom domain detected:', cleanHostname, '->', subdomain);
+      } else {
+        // Log when custom domain check fails (for debugging)
         if (process.env.NODE_ENV === 'development') {
-          console.log('[Middleware] Custom domain detected:', cleanHostname, '->', subdomain);
+          console.log('[Middleware] Custom domain not found in Redis:', cleanHostname);
         }
       }
     } catch (error) {
+      // Always log errors in production for debugging
       console.error('[Middleware] Error checking custom domain:', error);
+      console.error('[Middleware] Hostname:', cleanHostname, 'Root Domain:', cleanRootDomain);
     }
   }
   
@@ -122,9 +132,11 @@ export async function middleware(request: NextRequest) {
     }
   }
   
-  // Debug logging
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Middleware] Detected Subdomain:', subdomain);
+  // Debug logging (also log in production for troubleshooting)
+  if (subdomain) {
+    console.log('[Middleware] Detected Subdomain:', subdomain, 'from hostname:', hostname);
+  } else if (process.env.NODE_ENV === 'development') {
+    console.log('[Middleware] No subdomain detected for:', hostname);
   }
   
   // If we have a subdomain and it's not already going to /s/ route or dashboard/login
