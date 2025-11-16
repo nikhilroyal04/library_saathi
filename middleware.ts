@@ -8,6 +8,13 @@ export function middleware(request: NextRequest) {
   // Get root domain from environment or default
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000';
   
+  // Debug logging (remove in production if needed)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Middleware] Hostname:', hostname);
+    console.log('[Middleware] Root Domain:', rootDomain);
+    console.log('[Middleware] Pathname:', url.pathname);
+  }
+  
   // Skip middleware for static files, API routes, and Next.js internals
   if (
     url.pathname.startsWith('/_next') ||
@@ -90,6 +97,11 @@ export function middleware(request: NextRequest) {
     }
   }
   
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Middleware] Detected Subdomain:', subdomain);
+  }
+  
   // If we have a subdomain and it's not already going to /s/ route or dashboard/login
   if (
     subdomain && 
@@ -100,6 +112,11 @@ export function middleware(request: NextRequest) {
     // Rewrite to subdomain route
     const path = url.pathname === '/' ? '' : url.pathname;
     url.pathname = `/s/${subdomain}${path}`;
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Middleware] Rewriting to:', url.pathname);
+    }
+    
     return NextResponse.rewrite(url);
   }
   
