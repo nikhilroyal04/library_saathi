@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getSubdomainFromCustomDomain } from '@/lib/subdomains';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || '';
   
@@ -29,10 +30,32 @@ export function middleware(request: NextRequest) {
   const isLocalhost = hostname.includes('localhost');
   const isVercel = hostname.includes('vercel.app');
   
-  // Extract subdomain
+  // First, check if this is a custom domain
+  const cleanHostname = hostname.split(':')[0].toLowerCase();
+  const cleanRootDomain = rootDomain.split(':')[0].toLowerCase();
+  
+  // If hostname doesn't match root domain, check if it's a custom domain
   let subdomain: string | null = null;
   
-  if (isLocalhost) {
+  if (!cleanHostname.includes(cleanRootDomain) && !isLocalhost && !isVercel) {
+    // This might be a custom domain - check in Redis
+    try {
+      const customDomainSubdomain = await getSubdomainFromCustomDomain(cleanHostname);
+      if (customDomainSubdomain) {
+        subdomain = customDomainSubdomain;
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Middleware] Custom domain detected:', cleanHostname, '->', subdomain);
+        }
+      }
+    } catch (error) {
+      console.error('[Middleware] Error checking custom domain:', error);
+    }
+  }
+  
+  // If not a custom domain, extract subdomain normally
+  if (!subdomain) {
+    if (isLocalhost) {
     // For localhost: subdomain.localhost:3000
     const parts = hostname.split('.');
     if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www' && parts[0] !== rootDomain.split(':')[0]) {
@@ -94,6 +117,7 @@ export function middleware(request: NextRequest) {
       if (hostParts[0] === 'www' && hostParts.slice(1).join('.') === rootParts.join('.')) {
         subdomain = null; // www is treated as root
       }
+    }
     }
   }
   

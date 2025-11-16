@@ -172,6 +172,37 @@ export default function LibraryDetailsForm({
           </CardContent>
         </Card>
 
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-blue-600" />
+              Custom Domain
+            </CardTitle>
+            <CardDescription>
+              Connect your own domain (e.g., library.example.com). Add CNAME record pointing to {subdomain}.{rootDomain}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="customDomain">Custom Domain</Label>
+              <Input
+                id="customDomain"
+                name="customDomain"
+                type="text"
+                placeholder="library.example.com"
+                defaultValue={initialData.customDomain}
+              />
+              <p className="text-xs text-gray-600">
+                Enter your custom domain (without http:// or https://). After adding, configure CNAME in your DNS:
+                <br />
+                <code className="text-xs bg-white px-2 py-1 rounded border mt-1 inline-block">
+                  {initialData.customDomain || 'library.example.com'} → CNAME → {subdomain}.{rootDomain}
+                </code>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {state?.error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
             {state.error}
