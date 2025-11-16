@@ -30,14 +30,15 @@ export async function middleware(request: NextRequest) {
   const isLocalhost = hostname.includes('localhost');
   const isVercel = hostname.includes('vercel.app');
   
-  // First, check if this is a custom domain
+  // Clean hostname and root domain for comparison
   const cleanHostname = hostname.split(':')[0].toLowerCase();
   const cleanRootDomain = rootDomain.split(':')[0].toLowerCase();
   
-  // If hostname doesn't match root domain, check if it's a custom domain
   let subdomain: string | null = null;
   
-  if (!cleanHostname.includes(cleanRootDomain) && !isLocalhost && !isVercel) {
+  // First, check if this is a custom domain (different from root domain)
+  // Custom domain check should happen BEFORE normal subdomain detection
+  if (!cleanHostname.includes(cleanRootDomain) && cleanHostname !== cleanRootDomain) {
     // This might be a custom domain - check in Redis
     try {
       const customDomainSubdomain = await getSubdomainFromCustomDomain(cleanHostname);

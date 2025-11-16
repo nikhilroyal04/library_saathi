@@ -179,7 +179,7 @@ export default function LibraryDetailsForm({
               Custom Domain
             </CardTitle>
             <CardDescription>
-              Connect your own domain (e.g., library.example.com). Add CNAME record pointing to {subdomain}.{rootDomain}
+              Connect your own domain (e.g., tenant.vikrantrathi.com). This will point to your subdomain.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -189,16 +189,28 @@ export default function LibraryDetailsForm({
                 id="customDomain"
                 name="customDomain"
                 type="text"
-                placeholder="library.example.com"
+                placeholder="tenant.vikrantrathi.com"
                 defaultValue={initialData.customDomain}
               />
-              <p className="text-xs text-gray-600">
-                Enter your custom domain (without http:// or https://). After adding, configure CNAME in your DNS:
-                <br />
-                <code className="text-xs bg-white px-2 py-1 rounded border mt-1 inline-block">
-                  {initialData.customDomain || 'library.example.com'} → CNAME → {subdomain}.{rootDomain}
-                </code>
-              </p>
+              <div className="space-y-2 text-xs text-gray-600">
+                <p className="font-medium">Steps to setup custom domain:</p>
+                <ol className="list-decimal list-inside space-y-1 ml-2">
+                  <li>Enter your custom domain above (without http:// or https://)</li>
+                  <li>Save this form</li>
+                  <li>Add CNAME record in your DNS provider:
+                    <br />
+                    <code className="text-xs bg-white px-2 py-1 rounded border mt-1 inline-block">
+                      {initialData.customDomain || 'tenant.vikrantrathi.com'} → CNAME → {subdomain}.{rootDomain}
+                    </code>
+                  </li>
+                  <li>If using Vercel, also add this domain in Vercel Dashboard → Settings → Domains</li>
+                  <li>Wait 5-60 minutes for DNS propagation</li>
+                </ol>
+                <p className="text-xs text-gray-500 mt-2">
+                  Example: If your custom domain is <code>tenant.vikrantrathi.com</code> and subdomain is <code>rathi.jyotilok.com</code>, 
+                  add CNAME: <code>tenant.vikrantrathi.com → rathi.jyotilok.com</code>
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
