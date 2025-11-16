@@ -19,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="flex-1 flex flex-col min-w-0">
         <Header />
         <main className="flex-1 overflow-y-auto">
-          {children}
+        {children}
         </main>
         <Footer />
       </div>

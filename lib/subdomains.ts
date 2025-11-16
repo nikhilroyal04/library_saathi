@@ -42,7 +42,6 @@ export type LibraryDetails = {
   address?: string;
   website?: string;
   timings?: string;
-  customDomain?: string; // Custom domain like library.example.com
 };
 
 export async function getSubdomainData(subdomain: string) {
@@ -61,33 +60,7 @@ export async function getLibraryDetails(subdomain: string): Promise<LibraryDetai
 
 export async function saveLibraryDetails(subdomain: string, details: LibraryDetails): Promise<void> {
   const sanitizedSubdomain = subdomain.toLowerCase().replace(/[^a-z0-9-]/g, '');
-  
-  // Get old details to check if custom domain changed
-  const oldDetails = await getLibraryDetails(sanitizedSubdomain);
-  const oldCustomDomain = oldDetails?.customDomain?.toLowerCase().trim();
-  const newCustomDomain = details.customDomain?.toLowerCase().trim();
-  
-  // Remove old custom domain mapping if it changed
-  if (oldCustomDomain && oldCustomDomain !== newCustomDomain) {
-    await redis.del(`customdomain:${oldCustomDomain}`);
-  }
-  
-  // Save library details
   await redis.set(`library:${sanitizedSubdomain}`, details);
-  
-  // Save custom domain mapping if provided
-  if (newCustomDomain) {
-    await redis.set(`customdomain:${newCustomDomain}`, sanitizedSubdomain);
-  }
-}
-
-/**
- * Get subdomain from custom domain
- */
-export async function getSubdomainFromCustomDomain(customDomain: string): Promise<string | null> {
-  const cleanDomain = customDomain.toLowerCase().trim();
-  const subdomain = await redis.get<string>(`customdomain:${cleanDomain}`);
-  return subdomain || null;
 }
 
 export async function getAllSubdomains() {
