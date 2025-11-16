@@ -32,11 +32,28 @@ export function middleware(request: NextRequest) {
       subdomain = parts[0];
     }
   } else {
-    // For production: subdomain.example.com
-    // parts = ['subdomain', 'example', 'com']
-    const rootParts = rootDomain.split('.');
-    if (parts.length > rootParts.length && parts[0] !== 'www') {
-      subdomain = parts[0];
+    // For production: subdomain.example.com or subdomain.www.example.com
+    // Remove port if present (e.g., example.com:3000 -> example.com)
+    const cleanHostname = hostname.split(':')[0];
+    const cleanRootDomain = rootDomain.split(':')[0];
+    
+    // Split by dots
+    const hostParts = cleanHostname.split('.');
+    const rootParts = cleanRootDomain.split('.');
+    
+    // Check if hostname has more parts than root domain (indicating a subdomain)
+    if (hostParts.length > rootParts.length) {
+      const potentialSubdomain = hostParts[0];
+      // Verify it's actually a subdomain by checking if the rest matches root domain
+      const hostWithoutSubdomain = hostParts.slice(1).join('.');
+      if (hostWithoutSubdomain === cleanRootDomain && potentialSubdomain !== 'www') {
+        subdomain = potentialSubdomain;
+      }
+    } else if (hostParts.length === rootParts.length) {
+      // Handle www subdomain - treat as root domain
+      if (hostParts[0] === 'www' && hostParts.slice(1).join('.') === rootParts.join('.')) {
+        subdomain = null; // www is treated as root
+      }
     }
   }
   
