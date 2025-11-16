@@ -8,16 +8,18 @@
    - Go to your Hostinger account
    - Navigate to **Domains** → **DNS Zone Editor**
 
-2. **Add Wildcard DNS Record**
-   - **Type**: `A` Record
+2. **Add Wildcard DNS Record (A Record - VPS ke liye zaroori)**
+   - **Type**: `A` Record (CNAME nahi - VPS par CNAME wildcard kaam nahi karta)
    - **Name**: `*` (asterisk - this is the wildcard)
-   - **Points to**: Your server IP address (where Next.js app is hosted)
+   - **Points to**: Your VPS server IP address
    - **TTL**: 3600 (or default)
 
+   **Important**: VPS par wildcard subdomains ke liye **A Record** use karna zaroori hai, CNAME nahi chalega.
+
    This will make ALL subdomains point to your server:
-   - `test1.yourdomain.com` → Your server
-   - `test2.yourdomain.com` → Your server
-   - `any-subdomain.yourdomain.com` → Your server
+   - `test1.yourdomain.com` → Your VPS IP
+   - `test2.yourdomain.com` → Your VPS IP
+   - `any-subdomain.yourdomain.com` → Your VPS IP
 
 3. **Add Main Domain A Record** (if not already present)
    - **Type**: `A` Record
@@ -26,9 +28,9 @@
    - **TTL**: 3600
 
 4. **Add WWW Record** (optional)
-   - **Type**: `CNAME` Record
+   - **Type**: `A` Record (VPS par A record use karo, CNAME bhi chalega but A record better hai)
    - **Name**: `www`
-   - **Points to**: `@` or your main domain
+   - **Points to**: Your VPS server IP address
    - **TTL**: 3600
 
 ### Step 2: Environment Variables
@@ -62,6 +64,9 @@ NODE_ENV=production
    ```
 
 2. **Setup Nginx Reverse Proxy**
+   
+   **Important**: Nginx config mein `Host` header properly pass hona zaroori hai middleware ke liye.
+   
    ```nginx
    server {
        listen 80;
@@ -70,22 +75,45 @@ NODE_ENV=production
        location / {
            proxy_pass http://localhost:3000;
            proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
+           
+           # Headers (Important for subdomain detection)
            proxy_set_header Host $host;
            proxy_set_header X-Real-IP $remote_addr;
            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
            proxy_set_header X-Forwarded-Proto $scheme;
+           proxy_set_header X-Forwarded-Host $host;
+           
+           # WebSocket support
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
            proxy_cache_bypass $http_upgrade;
+           
+           # Timeouts
+           proxy_connect_timeout 60s;
+           proxy_send_timeout 60s;
+           proxy_read_timeout 60s;
        }
    }
    ```
+   
+   **Complete VPS setup guide**: See `VPS_DEPLOYMENT.md` for detailed step-by-step instructions.
 
 3. **Setup SSL with Let's Encrypt**
+   
+   **Wildcard SSL Certificate** ke liye DNS challenge use karna hoga:
+   
    ```bash
    sudo apt install certbot python3-certbot-nginx
-   sudo certbot --nginx -d yourdomain.com -d *.yourdomain.com
+   
+   # Wildcard SSL (DNS challenge required)
+   sudo certbot certonly --manual --preferred-challenges dns \
+     -d yourdomain.com \
+     -d *.yourdomain.com \
+     --email your-email@example.com \
+     --agree-tos
    ```
+   
+   Certbot aapko DNS TXT record add karne ko kahega. DNS Zone Editor mein add karo, phir Enter press karo.
 
 #### Option B: Vercel/Netlify (Easier)
 
