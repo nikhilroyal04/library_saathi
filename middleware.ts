@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getSubdomainFromCustomDomain } from '@/lib/subdomains';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const hostname = request.headers.get('host') || '';
   
@@ -29,10 +30,43 @@ export function middleware(request: NextRequest) {
   const isLocalhost = hostname.includes('localhost');
   const isVercel = hostname.includes('vercel.app');
   
-  // Extract subdomain
+  // Clean hostname and root domain for comparison
+  const cleanHostname = hostname.split(':')[0].toLowerCase();
+  const cleanRootDomain = rootDomain.split(':')[0].toLowerCase();
+  
   let subdomain: string | null = null;
   
-  if (isLocalhost) {
+  // First, check if this is a custom domain (different from root domain)
+  // Custom domain check should happen BEFORE normal subdomain detection
+  // Check custom domain if hostname doesn't match root domain pattern
+  const isRootDomain = cleanHostname === cleanRootDomain || cleanHostname === `www.${cleanRootDomain}`;
+  const isSubdomainOfRoot = cleanHostname.endsWith(`.${cleanRootDomain}`) && cleanHostname !== cleanRootDomain;
+  
+  if (!isRootDomain && !isSubdomainOfRoot) {
+    // This might be a custom domain - check in Redis
+    try {
+      const customDomainSubdomain = await getSubdomainFromCustomDomain(cleanHostname);
+      if (customDomainSubdomain) {
+        subdomain = customDomainSubdomain;
+        
+        // Log in both development and production for debugging
+        console.log('[Middleware] Custom domain detected:', cleanHostname, '->', subdomain);
+      } else {
+        // Log when custom domain check fails (for debugging)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Middleware] Custom domain not found in Redis:', cleanHostname);
+        }
+      }
+    } catch (error) {
+      // Always log errors in production for debugging
+      console.error('[Middleware] Error checking custom domain:', error);
+      console.error('[Middleware] Hostname:', cleanHostname, 'Root Domain:', cleanRootDomain);
+    }
+  }
+  
+  // If not a custom domain, extract subdomain normally
+  if (!subdomain) {
+    if (isLocalhost) {
     // For localhost: subdomain.localhost:3000
     const parts = hostname.split('.');
     if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www' && parts[0] !== rootDomain.split(':')[0]) {
@@ -95,11 +129,14 @@ export function middleware(request: NextRequest) {
         subdomain = null; // www is treated as root
       }
     }
+    }
   }
   
-  // Debug logging
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Middleware] Detected Subdomain:', subdomain);
+  // Debug logging (also log in production for troubleshooting)
+  if (subdomain) {
+    console.log('[Middleware] Detected Subdomain:', subdomain, 'from hostname:', hostname);
+  } else if (process.env.NODE_ENV === 'development') {
+    console.log('[Middleware] No subdomain detected for:', hostname);
   }
   
   // If we have a subdomain and it's not already going to /s/ route or dashboard/login

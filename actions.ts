@@ -233,6 +233,7 @@ export async function saveLibraryDetailsAction(
     address: formData.get('address') as string || undefined,
     website: formData.get('website') as string || undefined,
     timings: formData.get('timings') as string || undefined,
+    customDomain: formData.get('customDomain') as string || undefined,
   };
 
   await saveLibraryDetails(subdomain, details);
