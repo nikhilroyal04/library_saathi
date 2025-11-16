@@ -20,19 +20,52 @@ export function middleware(request: NextRequest) {
   
   // Check if this is a subdomain request
   const isLocalhost = hostname.includes('localhost');
-  const parts = hostname.split('.');
+  const isVercel = hostname.includes('vercel.app');
   
   // Extract subdomain
   let subdomain: string | null = null;
   
   if (isLocalhost) {
     // For localhost: subdomain.localhost:3000
-    // parts = ['subdomain', 'localhost:3000']
+    const parts = hostname.split('.');
     if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www' && parts[0] !== rootDomain.split(':')[0]) {
       subdomain = parts[0];
     }
+  } else if (isVercel) {
+    // For Vercel with custom domain: subdomain.yourdomain.com
+    // For Vercel preview: subdomain-yourproject.vercel.app
+    const parts = hostname.split('.');
+    
+    // Check if it's a custom domain (has your root domain)
+    const cleanRootDomain = rootDomain.split(':')[0];
+    if (hostname.includes(cleanRootDomain) && !hostname.includes('vercel.app')) {
+      // Custom domain on Vercel - use normal subdomain detection
+      const cleanHostname = hostname.split(':')[0];
+      const hostParts = cleanHostname.split('.');
+      const rootParts = cleanRootDomain.split('.');
+      
+      if (hostParts.length > rootParts.length) {
+        const potentialSubdomain = hostParts[0];
+        const hostWithoutSubdomain = hostParts.slice(1).join('.');
+        if (hostWithoutSubdomain === cleanRootDomain && potentialSubdomain !== 'www') {
+          subdomain = potentialSubdomain;
+        }
+      }
+    } else {
+      // Vercel preview URL: test1-yourproject.vercel.app
+      // Extract subdomain from first part before dash
+      if (parts.length >= 2) {
+        const firstPart = parts[0];
+        if (firstPart.includes('-')) {
+          const subdomainPart = firstPart.split('-')[0];
+          if (subdomainPart && subdomainPart !== 'www' && subdomainPart.length > 0) {
+            subdomain = subdomainPart;
+          }
+        }
+      }
+    }
   } else {
-    // For production: subdomain.example.com or subdomain.www.example.com
+    // For production: subdomain.example.com
     // Remove port if present (e.g., example.com:3000 -> example.com)
     const cleanHostname = hostname.split(':')[0];
     const cleanRootDomain = rootDomain.split(':')[0];
