@@ -4,53 +4,55 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
+const navItems = [
+  { href: '/', label: 'Home' },
+  { href: '/features', label: 'Features' },
+  { href: '/gallery', label: 'Gallery' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+]
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
-    <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+    <header className="bg-white shadow-md sticky top-0 left-0 right-0 z-50 border border-gray-200">
       <nav className="max-w-7xl mx-auto h-16 p-3">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           {/* Logo/Brand */}
           <Link href="/" className="logo-link">
-              <Image
-                src="/logo.png"
-                alt="Library Saathi Logo"
-                width={100}
-                height={100}
-                className="logo-image"
-              />
+            <Image
+              src="/logo.png"
+              alt="Library Saathi Logo"
+              width={100}
+              height={100}
+              className="logo-image"
+            />
           </Link>
 
           {/* Navigation Links */}
-          <div className="nav-links flex space-x-4 flex-wrap">
-            <Link href="/" className="nav-link text-secondary hover:text-accent transition-colors">
-              Home
-            </Link>
-            <Link href="/features" className="nav-link text-secondary hover:text-accent transition-colors">
-              Features
-            </Link>
-            <Link href="/contact" className="nav-link text-secondary hover:text-accent transition-colors">
-              Contact
-            </Link>
+          <div className="nav-links flex items-center space-x-4 flex-wrap">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="nav-link text-secondary hover:text-accent transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
             <Link
-              href="/register-your-library"
-              className="nav-link text-secondary hover:text-accent transition-colors"
+              href="/book-now"
+              className="ml-2 bg-accent text-white px-5 py-2 rounded font-semibold hover:bg-accent/90 transition nav-link-cta"
             >
-              Register Your Library
-            </Link>
-            <Link
-              href="/dashboard"
-              className="nav-link text-secondary hover:text-accent transition-colors"
-            >
-              Dashboard
+              Book Now
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="mobile-menu-button text-secondary hover:text-accent"
+            className="mobile-menu-button text-secondary hover:text-accent md:hidden"
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? (
@@ -83,41 +85,23 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="mobile-menu bg-primary rounded shadow-lg mt-2 p-4 flex flex-col space-y-2">
+          <div className="mobile-menu bg-primary rounded shadow-lg mt-2 p-4 flex flex-col space-y-2 md:hidden">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="mobile-menu-link text-secondary hover:text-accent transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
             <Link
-              href="/"
+              href="/book-now"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="mobile-menu-link text-secondary hover:text-accent"
+              className="mobile-menu-link-cta bg-accent text-white px-4 py-2 rounded font-semibold hover:bg-accent/90 transition"
             >
-              Home
-            </Link>
-            <Link
-              href="/features"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="mobile-menu-link text-secondary hover:text-accent"
-            >
-              Features
-            </Link>
-            <Link
-              href="/contact"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="mobile-menu-link text-secondary hover:text-accent"
-            >
-              Contact
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="mobile-menu-link text-secondary hover:text-accent"
-            >
-              Register
-            </Link>
-            <Link
-              href="/register-your-library"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="mobile-menu-link-cta bg-accent text-white px-4 py-2 rounded hover:bg-accent/90 transition"
-            >
-              Your Library
+              Book Now
             </Link>
           </div>
         )}

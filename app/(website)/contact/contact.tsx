@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import PageHero from '@/components/PageHero'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -28,26 +29,16 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800">
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center px-4 py-2 mb-6 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
-            <span className="text-sm sm:text-base font-medium text-white">
-              📧 Get In Touch
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4">
-            Contact Us
-          </h1>
-          <p className="text-sm sm:text-base lg:text-lg text-blue-50 max-w-3xl mx-auto">
-            Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        badge="📧 Get In Touch"
+        title="Contact Us"
+        description="Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible."
+        gradient="blue"
+      />
 
       {/* Contact Form Section */}
       <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Contact Info */}
             <div className="lg:col-span-1">
