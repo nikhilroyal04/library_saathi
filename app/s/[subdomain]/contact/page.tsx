@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
-import { Mail, Phone, MapPin, Clock, Globe } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Globe, MessageCircle } from 'lucide-react';
+import ContactForm from './contact-form';
 
 export default async function ContactPage({
   params
@@ -14,103 +15,109 @@ export default async function ContactPage({
   if (!subdomainData) {
     notFound();
   }
+  const libraryName = libraryDetails?.name || `${subdomain} Library`;
 
   return (
-    <div className="bg-white">
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
-          <p className="text-lg text-gray-600">
-            Get in touch with {libraryDetails?.name || `${subdomain} Library`}
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl mb-6">
+            <MessageCircle className="w-10 h-10 text-blue-600" />
+          </div>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4">
+            Contact{' '}
+            <span className="bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 bg-clip-text text-transparent">
+              Us
+            </span>
+          </h1>
+          <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto font-medium">
+            Get in touch with {libraryName}. We're here to help and answer any questions you may have.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          {libraryDetails?.email && (
-            <div className="p-6 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Mail className="w-5 h-5 text-blue-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900">Email</h3>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Contact Information */}
+          <div className="lg:col-span-1 space-y-4">
+            <h2 className="text-lg font-extrabold text-gray-900 mb-6">Contact Information</h2>
+            
+            {libraryDetails?.email && (
               <a 
                 href={`mailto:${libraryDetails.email}`}
-                className="text-blue-600 hover:text-blue-700"
+                className="group flex items-center gap-4 p-5 bg-white rounded-xl border-2 border-gray-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
               >
-                {libraryDetails.email}
-              </a>
-            </div>
-          )}
-
-          {libraryDetails?.phone && (
-            <div className="p-6 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <Phone className="w-5 h-5 text-green-600" />
+                <div className="p-3 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <Mail className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900">Phone</h3>
-              </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase mb-1">Email</p>
+                  <p className="text-sm font-bold text-gray-900">{libraryDetails.email}</p>
+                </div>
+              </a>
+            )}
+
+            {libraryDetails?.phone && (
               <a 
                 href={`tel:${libraryDetails.phone}`}
-                className="text-green-600 hover:text-green-700"
+                className="group flex items-center gap-4 p-5 bg-white rounded-xl border-2 border-gray-100 hover:border-green-300 hover:shadow-lg transition-all duration-300"
               >
-                {libraryDetails.phone}
+                <div className="p-3 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <Phone className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase mb-1">Phone</p>
+                  <p className="text-sm font-bold text-gray-900">{libraryDetails.phone}</p>
+                </div>
               </a>
-            </div>
-          )}
+            )}
 
-          {libraryDetails?.address && (
-            <div className="p-6 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <MapPin className="w-5 h-5 text-purple-600" />
+            {libraryDetails?.address && (
+              <div className="flex items-start gap-4 p-5 bg-white rounded-xl border-2 border-gray-100">
+                <div className="p-3 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl">
+                  <MapPin className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900">Address</h3>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase mb-1">Address</p>
+                  <p className="text-sm font-bold text-gray-900">{libraryDetails.address}</p>
+                </div>
               </div>
-              <p className="text-gray-600">{libraryDetails.address}</p>
-            </div>
-          )}
+            )}
 
-          {libraryDetails?.timings && (
-            <div className="p-6 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <Clock className="w-5 h-5 text-orange-600" />
+            {libraryDetails?.timings && (
+              <div className="flex items-start gap-4 p-5 bg-white rounded-xl border-2 border-gray-100">
+                <div className="p-3 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl">
+                  <Clock className="w-6 h-6 text-orange-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900">Opening Hours</h3>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase mb-1">Opening Hours</p>
+                  <p className="text-sm font-bold text-gray-900">{libraryDetails.timings}</p>
+                </div>
               </div>
-              <p className="text-gray-600">{libraryDetails.timings}</p>
-            </div>
-          )}
+            )}
 
-          {libraryDetails?.website && (
-            <div className="p-6 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-cyan-100 rounded-lg">
-                  <Globe className="w-5 h-5 text-cyan-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900">Website</h3>
-              </div>
+            {libraryDetails?.website && (
               <a 
                 href={libraryDetails.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-cyan-600 hover:text-cyan-700"
+                className="group flex items-center gap-4 p-5 bg-white rounded-xl border-2 border-gray-100 hover:border-cyan-300 hover:shadow-lg transition-all duration-300"
               >
-                {libraryDetails.website}
+                <div className="p-3 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <Globe className="w-6 h-6 text-cyan-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase mb-1">Website</p>
+                  <p className="text-sm font-bold text-gray-900">{libraryDetails.website}</p>
+                </div>
               </a>
-            </div>
-          )}
-        </div>
-
-        {!libraryDetails?.email && !libraryDetails?.phone && !libraryDetails?.address && (
-          <div className="text-center p-8 bg-gray-50 rounded-lg">
-            <p className="text-gray-600">
-              Contact information will be displayed here once the library details are updated.
-            </p>
+            )}
           </div>
-        )}
+
+          {/* Contact Form */}
+          <div className="lg:col-span-2">
+            <ContactForm />
+          </div>
+        </div>
       </section>
     </div>
   );
