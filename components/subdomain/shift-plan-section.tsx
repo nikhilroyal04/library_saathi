@@ -1,153 +1,110 @@
 'use client';
 
 import React from 'react';
-import { Clock, Calendar, Users, RotateCcw, Sparkles } from 'lucide-react';
+import { Clock, Calendar, Users, RotateCcw } from 'lucide-react';
 
 const ShiftPlanSection = () => {
   const shifts = [
     {
       name: 'Morning Shift',
       time: '8:00 AM - 12:00 PM',
-      icon: '🌅',
-      gradient: 'from-orange-400 via-amber-400 to-yellow-400',
-      bgGradient: 'from-orange-50 to-amber-50',
-      borderColor: 'border-orange-200',
-      textColor: 'text-orange-700',
-      iconBg: 'bg-orange-100',
-      iconColor: 'text-orange-600',
-      shadow: 'shadow-orange-200'
+      icon: '🌅'
     },
     {
       name: 'Afternoon Shift',
       time: '12:00 PM - 4:00 PM',
-      icon: '☀️',
-      gradient: 'from-yellow-400 via-orange-400 to-amber-400',
-      bgGradient: 'from-yellow-50 to-orange-50',
-      borderColor: 'border-yellow-200',
-      textColor: 'text-yellow-700',
-      iconBg: 'bg-yellow-100',
-      iconColor: 'text-yellow-600',
-      shadow: 'shadow-yellow-200'
+      icon: '☀️'
     },
     {
       name: 'Evening Shift',
       time: '4:00 PM - 8:00 PM',
-      icon: '🌆',
-      gradient: 'from-purple-400 via-pink-400 to-rose-400',
-      bgGradient: 'from-purple-50 to-pink-50',
-      borderColor: 'border-purple-200',
-      textColor: 'text-purple-700',
-      iconBg: 'bg-purple-100',
-      iconColor: 'text-purple-600',
-      shadow: 'shadow-purple-200'
+      icon: '🌆'
     },
     {
       name: 'Night Shift',
       time: '8:00 PM - 12:00 AM',
-      icon: '🌙',
-      gradient: 'from-indigo-400 via-blue-400 to-cyan-400',
-      bgGradient: 'from-indigo-50 to-blue-50',
-      borderColor: 'border-indigo-200',
-      textColor: 'text-indigo-700',
-      iconBg: 'bg-indigo-100',
-      iconColor: 'text-indigo-600',
-      shadow: 'shadow-indigo-200'
+      icon: '🌙'
     }
   ];
 
   return (
-    <section className="py-12 bg-gradient-to-br from-gray-50 via-blue-50/30 to-cyan-50/30">
+    <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center px-3 py-1.5 mb-3 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 border-2 border-blue-200">
-            <Sparkles className="w-4 h-4 text-blue-600 mr-2" />
-            <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">
-              ⏰ Shift Management
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-3">
-            Plan Your{' '}
-            <span className="bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 bg-clip-text text-transparent">
-              Library Shifts
-            </span>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+            Our <span className="text-blue-600">Library Shifts</span>
           </h2>
-          <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto font-medium">
-            Manage multiple shifts, assign staff schedules, and optimize your library operations with our intelligent shift planning system
+          <p className="text-base text-gray-600 max-w-3xl mx-auto">
+            We operate in multiple shifts throughout the day to serve you better. Choose the time that works best for you and visit us during your preferred shift.
           </p>
         </div>
 
         {/* Shifts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          {shifts.map((shift, index) => (
+          {shifts.map((shift, index) => {
+            const colors = [
+              { bg: 'bg-orange-50', border: 'border-orange-200', icon: 'text-orange-600' },
+              { bg: 'bg-yellow-50', border: 'border-yellow-200', icon: 'text-yellow-600' },
+              { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600' },
+              { bg: 'bg-indigo-50', border: 'border-indigo-200', icon: 'text-indigo-600' }
+            ];
+            const color = colors[index % colors.length];
+            return (
             <div
               key={index}
-              className={`group relative overflow-hidden bg-gradient-to-br ${shift.bgGradient} rounded-xl border-2 ${shift.borderColor} hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer`}
+              className={`bg-white rounded-lg border ${color.border} hover:border-blue-300 hover:shadow-lg transition-all duration-200 p-6`}
             >
-              {/* Gradient overlay on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${shift.gradient} opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300`}></div>
-              
-              {/* Decorative corner */}
-              <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${shift.gradient} opacity-0 group-hover:opacity-20 rounded-bl-full transition-opacity duration-300`}></div>
-              
-              <div className="relative p-5">
-                {/* Icon */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl ${shift.iconBg} group-hover:scale-110 transition-transform duration-300`}>
-                    <span className="text-4xl">{shift.icon}</span>
-                  </div>
-                  <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${shift.gradient} opacity-60 group-hover:opacity-100 transition-opacity`}></div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`p-2 ${color.bg} rounded-lg`}>
+                  <span className="text-2xl">{shift.icon}</span>
                 </div>
-
-                {/* Content */}
-                <div>
-                  <h3 className="text-lg font-extrabold text-gray-900 mb-2 group-hover:scale-105 transition-transform duration-300">
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
                     {shift.name}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <Clock className={`w-4 h-4 ${shift.iconColor}`} />
-                    <span className={`text-sm font-bold ${shift.textColor}`}>
+                    <Clock className={`w-4 h-4 ${color.icon}`} />
+                    <span className="text-sm font-medium text-gray-600">
                       {shift.time}
                     </span>
                   </div>
                 </div>
-
-                {/* Bottom accent line */}
-                <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${shift.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`}></div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="group p-6 bg-white rounded-xl border-2 border-gray-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-            <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-              <Users className="w-7 h-7 text-blue-600" />
+          <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+            <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+              <Users className="w-6 h-6 text-blue-600" />
             </div>
-            <h4 className="text-lg font-extrabold text-gray-900 mb-2">Staff Assignment</h4>
-            <p className="text-sm text-gray-600 font-medium leading-relaxed">
-              Easily assign staff members to different shifts with drag-and-drop interface
+            <h4 className="text-lg font-semibold text-gray-900 mb-2">Dedicated Staff</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Our experienced staff members are available during each shift to assist you with all your library needs
             </p>
           </div>
           
-          <div className="group p-6 bg-white rounded-xl border-2 border-gray-100 hover:border-green-300 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-            <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-              <Calendar className="w-7 h-7 text-green-600" />
+          <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+            <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+              <Calendar className="w-6 h-6 text-blue-600" />
             </div>
-            <h4 className="text-lg font-extrabold text-gray-900 mb-2">Calendar View</h4>
-            <p className="text-sm text-gray-600 font-medium leading-relaxed">
-              Visual calendar to see all shifts at a glance and manage schedules efficiently
+            <h4 className="text-lg font-semibold text-gray-900 mb-2">Flexible Timing</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Visit us at any time during our operating hours. We have shifts throughout the day to accommodate your schedule
             </p>
           </div>
           
-          <div className="group p-6 bg-white rounded-xl border-2 border-gray-100 hover:border-purple-300 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-            <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-              <RotateCcw className="w-7 h-7 text-purple-600" />
+          <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+            <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+              <RotateCcw className="w-6 h-6 text-blue-600" />
             </div>
-            <h4 className="text-lg font-extrabold text-gray-900 mb-2">Auto Rotation</h4>
-            <p className="text-sm text-gray-600 font-medium leading-relaxed">
-              Automatic shift rotation to ensure fair distribution of work hours
+            <h4 className="text-lg font-semibold text-gray-900 mb-2">Consistent Service</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              We maintain consistent quality of service across all shifts, ensuring you have a great experience whenever you visit
             </p>
           </div>
         </div>

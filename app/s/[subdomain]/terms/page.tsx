@@ -19,17 +19,17 @@ export default async function TermsPage({
   const lastUpdated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="bg-white">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl mb-4">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl mb-4">
             <Scale className="w-8 h-8 text-blue-600" />
           </div>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Terms of Service
           </h1>
-          <p className="text-base md:text-lg text-gray-600 font-medium">
+          <p className="text-base text-gray-600">
             {libraryName}
           </p>
           <p className="text-xs text-gray-500 mt-2">
@@ -38,31 +38,31 @@ export default async function TermsPage({
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 md:p-10 space-y-8">
+        <div className="bg-white rounded-lg border border-gray-200 p-8 md:p-10 space-y-8">
           {/* Introduction */}
           <div>
-            <h2 className="text-lg font-extrabold text-gray-900 mb-4 flex items-center gap-3">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-3">
               <FileText className="w-6 h-6 text-blue-600" />
               Introduction
             </h2>
-            <p className="text-gray-700 leading-relaxed font-medium">
+            <p className="text-gray-600 leading-relaxed">
               Welcome to {libraryName}. By accessing and using our library services, you agree to comply with and be bound by the following terms and conditions. Please read these terms carefully before using our services.
             </p>
           </div>
 
           {/* Membership Terms */}
           <div>
-            <h2 className="text-lg font-extrabold text-gray-900 mb-4 flex items-center gap-3">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-3">
               <BookOpen className="w-6 h-6 text-blue-600" />
               Membership Terms
             </h2>
             <div className="space-y-4">
               <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-blue-600" />
                   Eligibility
                 </h3>
-                <ul className="list-disc list-inside text-gray-700 space-y-1 font-medium text-sm ml-7">
+                <ul className="list-disc list-inside text-gray-600 space-y-1 text-sm ml-7">
                   <li>Membership is open to all individuals who meet our eligibility criteria</li>
                   <li>Valid government-issued ID is required for membership registration</li>
                   <li>Members must be at least 18 years old, or have parental consent if under 18</li>
@@ -70,11 +70,11 @@ export default async function TermsPage({
                 </ul>
               </div>
               <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   Membership Responsibilities
                 </h3>
-                <ul className="list-disc list-inside text-gray-700 space-y-1 font-medium text-sm ml-7">
+                <ul className="list-disc list-inside text-gray-600 space-y-1 text-sm ml-7">
                   <li>Keep your membership information up to date</li>
                   <li>Report lost or stolen membership cards immediately</li>
                   <li>Comply with all library rules and regulations</li>
@@ -86,11 +86,11 @@ export default async function TermsPage({
 
           {/* Borrowing Terms */}
           <div>
-            <h2 className="text-lg font-extrabold text-gray-900 mb-4">Borrowing Terms</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Borrowing Terms</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-bold text-gray-900 mb-2">Loan Periods</h3>
-                <p className="text-sm text-gray-700 font-medium">
+                <h3 className="font-semibold text-gray-900 mb-2">Loan Periods</h3>
+                <p className="text-sm text-gray-600">
                   Books are typically loaned for 14 days. Extended loan periods may be available for certain materials. Renewals are subject to availability.
                 </p>
               </div>
@@ -117,13 +117,13 @@ export default async function TermsPage({
 
           {/* Fees and Charges */}
           <div>
-            <h2 className="text-lg font-extrabold text-gray-900 mb-4">Fees and Charges</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Fees and Charges</h2>
             <div className="space-y-3">
               <div className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                 <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-1">Late Fees</h3>
-                  <p className="text-sm text-gray-700 font-medium">
+                  <h3 className="font-semibold text-gray-900 mb-1">Late Fees</h3>
+                  <p className="text-sm text-gray-600">
                     A late fee of ₹5 per day per book applies for items returned after the due date. Maximum late fees may apply as per library policy.
                   </p>
                 </div>
@@ -151,11 +151,11 @@ export default async function TermsPage({
 
           {/* Code of Conduct */}
           <div>
-            <h2 className="text-lg font-extrabold text-gray-900 mb-4">Code of Conduct</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Code of Conduct</h2>
             <div className="space-y-3">
               <div className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-lg">
                 <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-700 font-medium text-sm">
+                <p className="text-gray-600 text-sm">
                   <strong className="text-gray-900">Prohibited:</strong> Disruptive behavior, loud conversations, use of mobile phones in quiet zones, eating in restricted areas, and any activity that disturbs other members.
                 </p>
               </div>
@@ -170,29 +170,29 @@ export default async function TermsPage({
 
           {/* Liability */}
           <div>
-            <h2 className="text-lg font-extrabold text-gray-900 mb-4">Limitation of Liability</h2>
-            <p className="text-gray-700 leading-relaxed font-medium">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Limitation of Liability</h2>
+            <p className="text-gray-600 leading-relaxed">
               {libraryName} shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of our services. While we strive to provide accurate information and maintain our facilities, we do not guarantee uninterrupted access or error-free service.
             </p>
           </div>
 
           {/* Changes to Terms */}
           <div>
-            <h2 className="text-lg font-extrabold text-gray-900 mb-4">Changes to Terms</h2>
-            <p className="text-gray-700 leading-relaxed font-medium">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Changes to Terms</h2>
+            <p className="text-gray-600 leading-relaxed">
               We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting on this page. Your continued use of our services after changes are posted constitutes acceptance of the modified terms.
             </p>
           </div>
 
           {/* Contact Information */}
-          <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-100">
-            <h2 className="text-lg font-extrabold text-gray-900 mb-4">Contact Us</h2>
-            <p className="text-gray-700 font-medium mb-4">
+          <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Contact Us</h2>
+            <p className="text-gray-600 mb-4">
               If you have any questions about these Terms of Service, please contact us:
             </p>
             <div className="space-y-2">
               {libraryDetails?.email && (
-                <p className="text-sm font-medium">
+                <p className="text-sm font-semibold">
                   <strong className="text-gray-900">Email:</strong>{' '}
                   <a href={`mailto:${libraryDetails.email}`} className="text-blue-600 hover:text-blue-700">
                     {libraryDetails.email}
@@ -200,7 +200,7 @@ export default async function TermsPage({
                 </p>
               )}
               {libraryDetails?.phone && (
-                <p className="text-sm font-medium">
+                <p className="text-sm font-semibold">
                   <strong className="text-gray-900">Phone:</strong>{' '}
                   <a href={`tel:${libraryDetails.phone}`} className="text-blue-600 hover:text-blue-700">
                     {libraryDetails.phone}
@@ -208,7 +208,7 @@ export default async function TermsPage({
                 </p>
               )}
               {libraryDetails?.address && (
-                <p className="text-sm font-medium">
+                <p className="text-sm font-semibold">
                   <strong className="text-gray-900">Address:</strong> {libraryDetails.address}
                 </p>
               )}

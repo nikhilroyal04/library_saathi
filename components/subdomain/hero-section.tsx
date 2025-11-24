@@ -59,17 +59,9 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
     });
   };
 
-  const timeSlots = [
-    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
-    '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
-    '01:00 PM', '01:30 PM', '02:00 PM', '02:30 PM',
-    '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM',
-    '05:00 PM', '05:30 PM', '06:00 PM'
-  ];
 
-  const baseUrl = `${protocol}://${subdomain}.${rootDomain}`;
   const libraryName = libraryDetails?.name || `${subdomain} Library`;
-  const libraryDescription = libraryDetails?.description || 'Your trusted library management solution. Manage books, members, and more with ease.';
+  const libraryDescription = libraryDetails?.description || 'Your trusted community library. Discover a world of knowledge, peaceful reading spaces, and excellent service for all book lovers.';
 
   return (
     <section className="relative py-12 md:py-16 overflow-hidden">
@@ -85,21 +77,6 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
           <div className="space-y-6">
             {/* Logo/Emoji */}
             <div className="flex items-center gap-4">
-              {libraryDetails?.logo ? (
-                <div className="relative">
-                  <Image 
-                    src={libraryDetails.logo} 
-                    alt={libraryName} 
-                    width={96}
-                    height={96}
-                    className="h-20 w-20 rounded-xl object-cover ring-2 ring-blue-100 shadow-lg"
-                  />
-                </div>
-              ) : (
-                <div className="h-20 w-20 rounded-xl bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600 flex items-center justify-center shadow-lg ring-2 ring-blue-100">
-                  <span className="text-4xl">{emoji || '🏛️'}</span>
-                </div>
-              )}
               <div>
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight mb-1">
                   {libraryName}
@@ -116,8 +93,9 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
                 {libraryDescription}
               </p>
               <p className="text-base text-gray-600 leading-relaxed">
-                Experience modern library management with our comprehensive solution. 
-                Join thousands of satisfied members and discover the joy of reading.
+                Welcome to our library! We offer a peaceful reading environment, 
+                extensive book collection, and excellent services for all our members. 
+                Join us and discover the joy of reading.
               </p>
             </div>
 
@@ -173,10 +151,10 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
             <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
               <div className="mb-5">
                 <h2 className="text-2xl font-extrabold text-gray-900 mb-1">
-                  Book Your Seat
+                  Reserve Your Study Space
                 </h2>
                 <p className="text-sm text-gray-600 font-medium">
-                  Schedule a shift with us
+                  Book your preferred time slot at our library
                 </p>
               </div>
 
@@ -201,7 +179,7 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
                 <div>
                   <div>
                     <label htmlFor="phone" className="block text-xs font-bold text-gray-700 mb-1.5">
-                      <Mail className="w-3.5 h-3.5 inline mr-1" />
+                      <Phone className="w-3.5 h-3.5 inline mr-1" />
                       Mobile Number *
                     </label>
                     <input

@@ -25,7 +25,7 @@ export async function generateMetadata({
 
   return {
     title: libraryDetails?.name || `${subdomain} Library`,
-    description: libraryDetails?.description || `Welcome to ${subdomain} Library - Your trusted library management solution`
+    description: libraryDetails?.description || `Welcome to ${subdomain} Library - Your trusted community library`
   };
 }
 
@@ -45,7 +45,7 @@ export default async function SubdomainPage({
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto ">
+      <section className="mx-auto ">
         <HeroSection 
           subdomain={subdomain} 
           libraryDetails={libraryDetails || undefined}
