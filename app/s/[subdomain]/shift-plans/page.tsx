@@ -1,26 +1,35 @@
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
+'use client';
+
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
 import { Clock, Calendar, Users, RotateCcw, CheckCircle, AlertCircle } from 'lucide-react';
 import TestimonialSection from '@/components/subdomain/testimonial-section';
 import FaqSection from '@/components/subdomain/faq-section';
 
-export default async function ShiftPlansPage({
-  params
-}: {
-  params: Promise<{ subdomain: string }>;
-}) {
-  const { subdomain } = await params;
-  const subdomainData = await getSubdomainData(subdomain);
-  const libraryDetails = await getLibraryDetails(subdomain);
+interface ShiftPlansPageProps {
+  params: Promise<{ subdomain: string }> | { subdomain: string };
+}
 
-  if (!subdomainData) {
-    notFound();
-  }
+export default function ShiftPlansPage({ params }: ShiftPlansPageProps) {
+  const { subdomain } = useSubdomainParams(params);
+  const dispatch = useDispatch();
 
-  const libraryName = libraryDetails?.name || `${subdomain} Library`;
+  useEffect(() => {
+    dispatch(fetchLibraries() as any);
+  }, [dispatch]);
 
-  const shifts = [
+  const libraries = useSelector(selectLibraries);
+  const selectedLibrary = useMemo(() => {
+    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
+    return libraries.find(lib => lib?.subdomain === subdomain);
+  }, [libraries, subdomain]);
+
+  const libraryName = selectedLibrary?.name || `${subdomain} Library`;
+
+  // Default shifts if no data provided
+  const defaultShifts = [
     {
       name: 'Morning Shift',
       time: '8:00 AM - 12:00 PM',
@@ -66,6 +75,29 @@ export default async function ShiftPlansPage({
       staffCount: 2
     }
   ];
+
+  // Valid colors for shifts
+  const validColors = ['orange', 'yellow', 'purple', 'indigo'];
+  
+  // Use library shifts if available, otherwise use defaults
+  const libraryShifts = selectedLibrary?.shifts;
+  const shifts = libraryShifts && libraryShifts.length > 0
+    ? libraryShifts.map((shift, index) => {
+        const shiftColor = shift.color?.toLowerCase() || '';
+        const validColor = validColors.includes(shiftColor) ? shiftColor : validColors[index % validColors.length];
+        return {
+          name: shift.name,
+          time: shift.time,
+          icon: shift.icon || '📚',
+          color: validColor,
+          description: shift.description || '',
+          features: shift.features || [],
+          status: shift.status || 'active',
+          capacity: shift.capacity || 'N/A',
+          staffCount: shift.staffCount || 0
+        };
+      })
+    : defaultShifts;
 
   const colorClasses: Record<string, { bg: string; border: string; icon: string; text: string }> = {
     orange: { bg: 'bg-orange-50', border: 'border-orange-200', icon: 'text-orange-600', text: 'text-orange-700' },
@@ -114,7 +146,8 @@ export default async function ShiftPlansPage({
         {/* Shifts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
           {shifts.map((shift, index) => {
-            const colors = colorClasses[shift.color];
+            const colorKey = shift.color || 'orange';
+            const colors = colorClasses[colorKey] || colorClasses['orange'];
             return (
             <div
               key={index}
@@ -225,10 +258,10 @@ export default async function ShiftPlansPage({
       </section>
 
       {/* Testimonial Section */}
-      <TestimonialSection />
+      <TestimonialSection testimonials={selectedLibrary?.testimonials} />
 
       {/* FAQ Section */}
-      <FaqSection />
+      <FaqSection faqs={selectedLibrary?.faqs} />
     </div>
   );
 }

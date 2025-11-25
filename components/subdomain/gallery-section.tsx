@@ -4,8 +4,29 @@ import React from 'react';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
-const GallerySection = () => {
-  const galleryItems = [
+interface GalleryItem {
+  id?: number;
+  title: string;
+  description?: string;
+  image?: string;
+  icon?: string;
+  color?: string;
+}
+
+interface GallerySectionProps {
+  galleryItems?: GalleryItem[];
+}
+
+const GallerySection = ({ galleryItems: propGalleryItems }: GallerySectionProps) => {
+  // Default gallery items if no data provided
+  const defaultGalleryItems: Array<{
+    id: number;
+    title: string;
+    description: string;
+    icon: string;
+    image: string | null;
+    color: string;
+  }> = [
     {
       id: 1,
       title: 'Modern Reading Space',
@@ -56,6 +77,30 @@ const GallerySection = () => {
     }
   ];
 
+  const validColors = ['orange', 'blue', 'green', 'purple', 'indigo', 'pink'];
+  
+  const galleryItems: Array<{
+    id: number;
+    title: string;
+    description: string;
+    icon: string;
+    image: string | null;
+    color: string;
+  }> = propGalleryItems && propGalleryItems.length > 0 
+    ? propGalleryItems.map((item, index) => {
+        const itemColor = item.color?.toLowerCase() || '';
+        const validColor = validColors.includes(itemColor) ? itemColor : validColors[index % validColors.length];
+        return {
+          id: index + 1,
+          title: item.title,
+          description: item.description || '',
+          icon: item.icon || '📚',
+          image: item.image || null,
+          color: validColor
+        };
+      })
+    : defaultGalleryItems;
+
   const colorClasses: Record<string, { bg: string; border: string; icon: string }> = {
     orange: { bg: 'bg-orange-50', border: 'border-orange-200', icon: 'text-orange-600' },
     blue: { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-blue-600' },
@@ -81,10 +126,11 @@ const GallerySection = () => {
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {galleryItems.map((item, index) => {
-            const colors = colorClasses[item.color];
+            const colorKey = item.color || 'orange';
+            const colors = colorClasses[colorKey] || colorClasses['orange'];
             return (
             <div
-              key={item.id}
+              key={item.id || index}
               className={`group bg-white rounded-lg border ${colors.border} hover:border-blue-300 hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer`}
             >
               {item.image ? (
@@ -98,16 +144,18 @@ const GallerySection = () => {
                 </div>
               ) : (
                 <div className={`w-full h-48 ${colors.bg} flex items-center justify-center`}>
-                  <span className="text-6xl">{item.icon}</span>
+                  <span className="text-6xl">{item.icon || '📚'}</span>
                 </div>
               )}
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   {item.title}
                 </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {item.description}
-                </p>
+                {item.description && (
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {item.description}
+                  </p>
+                )}
               </div>
             </div>
             );

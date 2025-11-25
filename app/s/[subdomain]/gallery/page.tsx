@@ -1,85 +1,55 @@
-import { notFound } from 'next/navigation';
-import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
+'use client';
+
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
+import Image from 'next/image';
 import TestimonialSection from '@/components/subdomain/testimonial-section';
 import FaqSection from '@/components/subdomain/faq-section';
 
-export default async function GalleryPage({
-  params
-}: {
-  params: Promise<{ subdomain: string }>;
-}) {
-  const { subdomain } = await params;
-  const subdomainData = await getSubdomainData(subdomain);
-  const libraryDetails = await getLibraryDetails(subdomain);
+interface GalleryPageProps {
+  params: Promise<{ subdomain: string }> | { subdomain: string };
+}
 
-  if (!subdomainData) {
-    notFound();
-  }
+export default function GalleryPage({ params }: GalleryPageProps) {
+  const { subdomain } = useSubdomainParams(params);
+  const dispatch = useDispatch();
 
-  const galleryItems = [
-    {
-      id: 1,
-      title: 'Modern Reading Space',
-      description: 'Spacious reading areas with comfortable seating and natural lighting',
-      gradient: 'from-blue-500 to-cyan-500',
-      icon: '📚'
-    },
-    {
-      id: 2,
-      title: 'Digital Catalog',
-      description: 'Easy book search and browsing interface for members',
-      gradient: 'from-purple-500 to-pink-500',
-      icon: '💻'
-    },
-    {
-      id: 3,
-      title: 'Member Services Desk',
-      description: 'Dedicated help desk for member assistance and support',
-      gradient: 'from-green-500 to-emerald-500',
-      icon: '🛎️'
-    },
-    {
-      id: 4,
-      title: 'Quiet Study Zones',
-      description: 'Peaceful study areas designed for focused learning',
-      gradient: 'from-orange-500 to-amber-500',
-      icon: '📖'
-    },
-    {
-      id: 5,
-      title: 'Modern Facilities',
-      description: 'State-of-the-art facilities for enhanced reading experience',
-      gradient: 'from-indigo-500 to-blue-500',
-      icon: '⚡'
-    },
-    {
-      id: 6,
-      title: 'Community Events',
-      description: 'Regular workshops and community gatherings',
-      gradient: 'from-rose-500 to-pink-500',
-      icon: '🎉'
-    },
-    {
-      id: 7,
-      title: 'Children\'s Section',
-      description: 'Dedicated space for young readers with colorful and engaging environment',
-      gradient: 'from-yellow-500 to-orange-500',
-      icon: '🧸'
-    },
-    {
-      id: 8,
-      title: 'Computer Lab',
-      description: 'Fully equipped computer lab with internet access for research',
-      gradient: 'from-cyan-500 to-blue-500',
-      icon: '🖥️'
-    },
-    {
-      id: 9,
-      title: 'Meeting Rooms',
-      description: 'Private meeting rooms available for group study and events',
-      gradient: 'from-violet-500 to-purple-500',
-      icon: '🚪'
-    }
+  useEffect(() => {
+    dispatch(fetchLibraries() as any);
+  }, [dispatch]);
+
+  const libraries = useSelector(selectLibraries);
+  const selectedLibrary = useMemo(() => {
+    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
+    return libraries.find(lib => lib?.subdomain === subdomain);
+  }, [libraries, subdomain]);
+
+
+  // Use library gallery if available, otherwise use defaults
+  const libraryGallery = selectedLibrary?.gallery;
+  const galleryItems = libraryGallery && libraryGallery.length > 0
+    ? libraryGallery.map((item, index) => ({
+        id: index + 1,
+        title: item.title,
+        description: item.description || '',
+        icon: item.icon || '📚',
+        image: item.image || null,
+        color: item.color || 'blue'
+      }))
+    : [];
+
+  const colors = [
+    { bg: 'bg-blue-50', border: 'border-blue-200' },
+    { bg: 'bg-purple-50', border: 'border-purple-200' },
+    { bg: 'bg-green-50', border: 'border-green-200' },
+    { bg: 'bg-orange-50', border: 'border-orange-200' },
+    { bg: 'bg-indigo-50', border: 'border-indigo-200' },
+    { bg: 'bg-pink-50', border: 'border-pink-200' },
+    { bg: 'bg-yellow-50', border: 'border-yellow-200' },
+    { bg: 'bg-cyan-50', border: 'border-cyan-200' },
+    { bg: 'bg-violet-50', border: 'border-violet-200' }
   ];
 
   return (
@@ -97,37 +67,53 @@ export default async function GalleryPage({
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {galleryItems.map((item) => {
-            const colors = [
-              { bg: 'bg-blue-50', border: 'border-blue-200' },
-              { bg: 'bg-purple-50', border: 'border-purple-200' },
-              { bg: 'bg-green-50', border: 'border-green-200' },
-              { bg: 'bg-orange-50', border: 'border-orange-200' },
-              { bg: 'bg-indigo-50', border: 'border-indigo-200' },
-              { bg: 'bg-pink-50', border: 'border-pink-200' },
-              { bg: 'bg-yellow-50', border: 'border-yellow-200' },
-              { bg: 'bg-cyan-50', border: 'border-cyan-200' },
-              { bg: 'bg-violet-50', border: 'border-violet-200' }
-            ];
-            const color = colors[(item.id - 1) % colors.length];
+          {galleryItems.map((item, index) => {
+            const color = colors[index % colors.length];
             return (
             <div
-              key={item.id}
+              key={item.id || index}
               className={`group relative overflow-hidden rounded-lg aspect-[4/3] ${color.bg} border ${color.border} hover:border-blue-300 hover:shadow-lg transition-all duration-200 cursor-pointer`}
             >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-6xl">{item.icon}</div>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <h3 className="text-base font-semibold text-white mb-1">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-gray-200 leading-relaxed">
-                    {item.description}
-                  </p>
+              {item.image ? (
+                <div className="relative w-full h-full">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <h3 className="text-base font-semibold text-white mb-1">
+                        {item.title}
+                      </h3>
+                      {item.description && (
+                        <p className="text-xs text-gray-200 leading-relaxed">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-6xl">{item.icon}</div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <h3 className="text-base font-semibold text-white mb-1">
+                        {item.title}
+                      </h3>
+                      {item.description && (
+                        <p className="text-xs text-gray-200 leading-relaxed">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             );
           })}
@@ -135,10 +121,10 @@ export default async function GalleryPage({
       </section>
 
       {/* Testimonial Section */}
-      <TestimonialSection />
+      <TestimonialSection testimonials={selectedLibrary?.testimonials} />
 
       {/* FAQ Section */}
-      <FaqSection />
+      <FaqSection faqs={selectedLibrary?.faqs} />
     </div>
   );
 }

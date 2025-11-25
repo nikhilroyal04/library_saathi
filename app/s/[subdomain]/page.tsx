@@ -2,11 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
 import { rootDomain } from '@/lib/utils';
-import HeroSection from '@/components/subdomain/hero-section';
-import ShiftPlanSection from '@/components/subdomain/shift-plan-section';
-import TestimonialSection from '@/components/subdomain/testimonial-section';
-import GallerySection from '@/components/subdomain/gallery-section';
-import FaqSection from '@/components/subdomain/faq-section';
+import HomePage from './home/page';
 
 export async function generateMetadata({
   params
@@ -43,21 +39,6 @@ export default async function SubdomainPage({
   }
 
   return (
-    <div className="bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section */}
-      <section className="mx-auto ">
-        <HeroSection 
-          subdomain={subdomain} 
-          libraryDetails={libraryDetails || undefined}
-          emoji={subdomainData.emoji}
-        />
-      </section>
-
-      <ShiftPlanSection />
-      <TestimonialSection />
-      <GallerySection />
-      <FaqSection />
-
-    </div>
+    <HomePage params={{ subdomain }} />
   );
 }

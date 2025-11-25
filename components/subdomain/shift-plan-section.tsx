@@ -3,8 +3,25 @@
 import React from 'react';
 import { Clock, Calendar, Users, RotateCcw } from 'lucide-react';
 
-const ShiftPlanSection = () => {
-  const shifts = [
+interface Shift {
+  name: string;
+  time: string;
+  icon?: string;
+  color?: string;
+  description?: string;
+  features?: string[];
+  status?: string;
+  capacity?: string;
+  staffCount?: number;
+}
+
+interface ShiftPlanSectionProps {
+  shifts?: Shift[];
+}
+
+const ShiftPlanSection = ({ shifts: propShifts }: ShiftPlanSectionProps) => {
+  // Default shifts if no data provided
+  const defaultShifts: Shift[] = [
     {
       name: 'Morning Shift',
       time: '8:00 AM - 12:00 PM',
@@ -26,6 +43,8 @@ const ShiftPlanSection = () => {
       icon: '🌙'
     }
   ];
+
+  const shifts = propShifts && propShifts.length > 0 ? propShifts : defaultShifts;
 
   return (
     <section className="py-20 bg-gray-50">
@@ -57,7 +76,7 @@ const ShiftPlanSection = () => {
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className={`p-2 ${color.bg} rounded-lg`}>
-                  <span className="text-2xl">{shift.icon}</span>
+                  <span className="text-2xl">{shift.icon || '📚'}</span>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -69,8 +88,16 @@ const ShiftPlanSection = () => {
                       {shift.time}
                     </span>
                   </div>
+                  {shift.capacity && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Capacity: {shift.capacity}
+                    </div>
+                  )}
                 </div>
               </div>
+              {shift.description && (
+                <p className="text-sm text-gray-600 mt-2">{shift.description}</p>
+              )}
             </div>
             );
           })}

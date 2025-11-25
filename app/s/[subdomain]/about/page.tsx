@@ -1,23 +1,33 @@
-import { notFound } from 'next/navigation';
-import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
+'use client';
+
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
 import { BookOpen, Users, Award, Heart, Target, Sparkles, MapPin, Mail, Phone } from 'lucide-react';
 import TestimonialSection from '@/components/subdomain/testimonial-section';
 import FaqSection from '@/components/subdomain/faq-section';
 
-export default async function AboutPage({
-  params
-}: {
-  params: Promise<{ subdomain: string }>;
-}) {
-  const { subdomain } = await params;
-  const subdomainData = await getSubdomainData(subdomain);
-  const libraryDetails = await getLibraryDetails(subdomain);
+interface AboutPageProps {
+  params: Promise<{ subdomain: string }> | { subdomain: string };
+}
 
-  if (!subdomainData) {
-    notFound();
-  }
+export default function AboutPage({ params }: AboutPageProps) {
+  const { subdomain } = useSubdomainParams(params);
+  const dispatch = useDispatch();
 
-  const libraryName = libraryDetails?.name || `${subdomain} Library`;
+  useEffect(() => {
+    dispatch(fetchLibraries() as any);
+  }, [dispatch]);
+
+  const libraries = useSelector(selectLibraries);
+  const selectedLibrary = useMemo(() => {
+    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
+    return libraries.find(lib => lib?.subdomain === subdomain);
+  }, [libraries, subdomain]);
+
+  const libraryName = selectedLibrary?.name || `${subdomain} Library`;
+  const libraryDetails = selectedLibrary;
 
   return (
     <div className="bg-white">
@@ -25,7 +35,7 @@ export default async function AboutPage({
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-50 rounded-2xl mb-6">
-            <div className="text-5xl">{subdomainData.emoji}</div>
+            <div className="text-5xl">{selectedLibrary?.emoji || '📚'}</div>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             About <span className="text-blue-600">{libraryName}</span>
@@ -44,7 +54,8 @@ export default async function AboutPage({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Our Mission</h3>
             <p className="text-gray-600 leading-relaxed">
-              To provide access to knowledge and resources that empower our community. We strive to make learning accessible, enjoyable, and transformative for everyone who walks through our doors.
+              {libraryDetails?.about?.mission || 
+                'To provide access to knowledge and resources that empower our community. We strive to make learning accessible, enjoyable, and transformative for everyone who walks through our doors.'}
             </p>
           </div>
 
@@ -54,54 +65,95 @@ export default async function AboutPage({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Our Vision</h3>
             <p className="text-gray-600 leading-relaxed">
-              To be a leading community library that serves as a hub for learning and growth. We envision a community where knowledge flows freely and every individual can achieve their full potential through reading and learning.
+              {libraryDetails?.about?.vision || 
+                'To be a leading community library that serves as a hub for learning and growth. We envision a community where knowledge flows freely and every individual can achieve their full potential through reading and learning.'}
             </p>
           </div>
         </div>
 
         {/* Why Choose Us */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
-              Why Choose <span className="text-blue-600">Us?</span>
-            </h2>
-            <p className="text-base text-gray-600">Discover what makes our library special</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-center">
-              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Award className="w-6 h-6 text-blue-600" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Quality Resources</h4>
-              <p className="text-sm text-gray-600">Access to a wide range of books and digital resources for all ages</p>
+        {libraryDetails?.about?.whyChooseUs && libraryDetails.about.whyChooseUs.length > 0 ? (
+          <div className="mb-20">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+                Why Choose <span className="text-blue-600">Us?</span>
+              </h2>
+              <p className="text-base text-gray-600">Discover what makes our library special</p>
             </div>
 
-            <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-center">
-              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-6 h-6 text-green-600" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Community Focus</h4>
-              <p className="text-sm text-gray-600">Dedicated to serving our community's reading and learning needs</p>
-            </div>
-
-            <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-center">
-              <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-6 h-6 text-purple-600" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Modern Facilities</h4>
-              <p className="text-sm text-gray-600">Comfortable reading spaces and well-maintained facilities</p>
-            </div>
-
-            <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-center">
-              <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 text-orange-600" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Expert Staff</h4>
-              <p className="text-sm text-gray-600">Knowledgeable and friendly team ready to assist you</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {libraryDetails.about.whyChooseUs.map((item, index) => {
+                const iconMap: Record<string, typeof Award> = {
+                  Award,
+                  Heart,
+                  BookOpen,
+                  Users
+                };
+                const Icon = item.icon && iconMap[item.icon] ? iconMap[item.icon] : Award;
+                const colors = [
+                  { bg: 'bg-blue-50', icon: 'text-blue-600' },
+                  { bg: 'bg-green-50', icon: 'text-green-600' },
+                  { bg: 'bg-purple-50', icon: 'text-purple-600' },
+                  { bg: 'bg-orange-50', icon: 'text-orange-600' }
+                ];
+                const color = colors[index % colors.length];
+                
+                return (
+                  <div key={index} className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-center">
+                    <div className={`w-12 h-12 ${color.bg} rounded-lg flex items-center justify-center mx-auto mb-4`}>
+                      <Icon className={`w-6 h-6 ${color.icon}`} />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">{item.title || 'Feature'}</h4>
+                    <p className="text-sm text-gray-600">{item.description || ''}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="mb-20">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+                Why Choose <span className="text-blue-600">Us?</span>
+              </h2>
+              <p className="text-base text-gray-600">Discover what makes our library special</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-center">
+                <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Award className="w-6 h-6 text-blue-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Quality Resources</h4>
+                <p className="text-sm text-gray-600">Access to a wide range of books and digital resources for all ages</p>
+              </div>
+
+              <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-center">
+                <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-6 h-6 text-green-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Community Focus</h4>
+                <p className="text-sm text-gray-600">Dedicated to serving our community's reading and learning needs</p>
+              </div>
+
+              <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-center">
+                <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="w-6 h-6 text-purple-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Modern Facilities</h4>
+                <p className="text-sm text-gray-600">Comfortable reading spaces and well-maintained facilities</p>
+              </div>
+
+              <div className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 text-center">
+                <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-6 h-6 text-orange-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Expert Staff</h4>
+                <p className="text-sm text-gray-600">Knowledgeable and friendly team ready to assist you</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Contact Info */}
         {(libraryDetails?.email || libraryDetails?.phone || libraryDetails?.address) && (
@@ -153,10 +205,10 @@ export default async function AboutPage({
       </section>
 
       {/* Testimonial Section */}
-      <TestimonialSection />
+      <TestimonialSection testimonials={selectedLibrary?.testimonials} />
 
       {/* FAQ Section */}
-      <FaqSection />
+      <FaqSection faqs={selectedLibrary?.faqs} />
     </div>
   );
 }

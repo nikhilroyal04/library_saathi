@@ -1,22 +1,33 @@
-import { notFound } from 'next/navigation';
-import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
+'use client';
+
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
 import { BookOpen, Wifi, Monitor, Users, Coffee, Calendar, Printer, Headphones } from 'lucide-react';
 import TestimonialSection from '@/components/subdomain/testimonial-section';
 import FaqSection from '@/components/subdomain/faq-section';
 
-export default async function FacilitiesPage({
-  params
-}: {
-  params: Promise<{ subdomain: string }>;
-}) {
-  const { subdomain } = await params;
-  const subdomainData = await getSubdomainData(subdomain);
+interface FacilitiesPageProps {
+  params: Promise<{ subdomain: string }> | { subdomain: string };
+}
 
-  if (!subdomainData) {
-    notFound();
-  }
+export default function FacilitiesPage({ params }: FacilitiesPageProps) {
+  const { subdomain } = useSubdomainParams(params);
+  const dispatch = useDispatch();
 
-  const facilities = [
+  useEffect(() => {
+    dispatch(fetchLibraries() as any);
+  }, [dispatch]);
+
+  const libraries = useSelector(selectLibraries);
+  const selectedLibrary = useMemo(() => {
+    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
+    return libraries.find(lib => lib?.subdomain === subdomain);
+  }, [libraries, subdomain]);
+
+  // Default facilities if no data provided
+  const defaultFacilities = [
     {
       name: 'Reading Areas',
       description: 'Comfortable and spacious reading spaces with natural lighting and ergonomic seating',
@@ -67,6 +78,36 @@ export default async function FacilitiesPage({
     }
   ];
 
+  // Use library facilities if available, otherwise use defaults
+  const libraryFacilities = selectedLibrary?.facilities;
+  const facilities = libraryFacilities && libraryFacilities.length > 0
+    ? libraryFacilities.map((facility, index) => {
+        // Map icon name to Lucide icon component
+        const iconMap: Record<string, typeof BookOpen> = {
+          BookOpen,
+          Wifi,
+          Monitor,
+          Users,
+          Coffee,
+          Calendar,
+          Printer,
+          Headphones
+        };
+        const Icon = facility.icon && iconMap[facility.icon] ? iconMap[facility.icon] : BookOpen;
+        const validColors = ['blue', 'green', 'purple', 'orange', 'yellow', 'indigo', 'cyan', 'pink'];
+        const color = facility.color && validColors.includes(facility.color.toLowerCase()) 
+          ? facility.color.toLowerCase() 
+          : validColors[index % validColors.length];
+        
+        return {
+          name: facility.name,
+          description: facility.description || '',
+          icon: Icon,
+          color
+        };
+      })
+    : defaultFacilities;
+
   const colorClasses: Record<string, { bg: string; border: string; icon: string }> = {
     blue: { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-blue-600' },
     green: { bg: 'bg-green-50', border: 'border-green-200', icon: 'text-green-600' },
@@ -95,7 +136,8 @@ export default async function FacilitiesPage({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
           {facilities.map((facility, index) => {
             const Icon = facility.icon;
-            const colors = colorClasses[facility.color];
+            const colorKey = facility.color || 'blue';
+            const colors = colorClasses[colorKey] || colorClasses['blue'];
             return (
               <div
                 key={index}
@@ -122,10 +164,10 @@ export default async function FacilitiesPage({
       </section>
 
       {/* Testimonial Section */}
-      <TestimonialSection />
+      <TestimonialSection testimonials={selectedLibrary?.testimonials} />
 
       {/* FAQ Section */}
-      <FaqSection />
+      <FaqSection faqs={selectedLibrary?.faqs} />
     </div>
   );
 }

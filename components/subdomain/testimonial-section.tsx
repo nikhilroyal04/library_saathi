@@ -2,8 +2,22 @@
 
 import { Star } from 'lucide-react';
 
-const TestimonialSection = () => {
-  const testimonials = [
+interface Testimonial {
+  name: string;
+  role?: string;
+  library?: string;
+  image?: string;
+  rating?: number;
+  text: string;
+}
+
+interface TestimonialSectionProps {
+  testimonials?: Testimonial[];
+}
+
+const TestimonialSection = ({ testimonials: propTestimonials }: TestimonialSectionProps) => {
+  // Default testimonials if no data provided
+  const defaultTestimonials = [
     {
       name: 'Dr. Priya Sharma',
       role: 'Regular Member',
@@ -38,6 +52,8 @@ const TestimonialSection = () => {
     }
   ];
 
+  const testimonials = propTestimonials && propTestimonials.length > 0 ? propTestimonials : defaultTestimonials;
+
   // Duplicate testimonials for seamless scrolling
   const duplicatedTestimonials = [...testimonials, ...testimonials, ...testimonials];
 
@@ -56,13 +72,13 @@ const TestimonialSection = () => {
     >
       {/* Rating Stars */}
       <div className="flex items-center gap-1 mb-3">
-        {[...Array(testimonial.rating)].map((_, i) => (
+        {[...Array(testimonial.rating || 5)].map((_, i) => (
           <Star
             key={i}
             className="w-4 h-4 text-yellow-400 fill-current"
           />
         ))}
-        <span className="ml-2 text-sm font-semibold text-gray-600">5.0</span>
+        <span className="ml-2 text-sm font-semibold text-gray-600">{testimonial.rating || 5}.0</span>
       </div>
 
       {/* Testimonial Text */}
@@ -73,18 +89,22 @@ const TestimonialSection = () => {
       {/* Author Info */}
       <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
         <div className={`w-12 h-12 ${color.bg} rounded-lg flex items-center justify-center text-xl`}>
-          {testimonial.image}
+          {testimonial.image || '👤'}
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-gray-900 text-sm mb-0.5 truncate">
             {testimonial.name}
           </div>
-          <div className="text-xs text-gray-600 mb-0.5 truncate">
-            {testimonial.role}
-          </div>
-          <div className="text-xs text-gray-500 truncate">
-            {testimonial.library}
-          </div>
+          {testimonial.role && (
+            <div className="text-xs text-gray-600 mb-0.5 truncate">
+              {testimonial.role}
+            </div>
+          )}
+          {testimonial.library && (
+            <div className="text-xs text-gray-500 truncate">
+              {testimonial.library}
+            </div>
+          )}
         </div>
       </div>
     </div>

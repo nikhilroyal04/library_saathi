@@ -3,51 +3,76 @@
 import React, { useState } from 'react';
 import { ChevronDown, Clock, UserPlus, Building2, BookOpen, DollarSign, RefreshCw, AlertCircle, Calendar, ArrowRight } from 'lucide-react';
 
-const FaqSection = () => {
+interface FAQ {
+  question: string;
+  answer: string;
+  icon?: string;
+}
+
+interface FaqSectionProps {
+  faqs?: FAQ[];
+}
+
+const FaqSection = ({ faqs: propFaqs }: FaqSectionProps) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const faqs = [
+  // Icon mapping for string icon names
+  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    Clock,
+    UserPlus,
+    Building2,
+    BookOpen,
+    DollarSign,
+    RefreshCw,
+    AlertCircle,
+    Calendar
+  };
+
+  // Default FAQs if no data provided
+  const defaultFaqs = [
     {
       question: 'What are your library timings?',
       answer: 'Our library is open from 8:00 AM to 8:00 PM, Monday through Saturday. We are closed on Sundays and public holidays. You can also check our shift plans for specific timing details.',
-      icon: Clock
+      icon: 'Clock'
     },
     {
       question: 'How do I become a member?',
       answer: 'Becoming a member is easy! Simply visit our library during operating hours, fill out the membership form, and provide a valid ID proof. Our staff will guide you through the process and issue your membership card.',
-      icon: UserPlus
+      icon: 'UserPlus'
     },
     {
       question: 'What facilities are available?',
       answer: 'We offer a wide range of facilities including reading areas, study zones, computer access, Wi-Fi, printing services, and a dedicated children\'s section. We also have meeting rooms available for booking.',
-      icon: Building2
+      icon: 'Building2'
     },
     {
       question: 'Can I reserve books in advance?',
       answer: 'Yes! You can reserve books through our online catalog system or by visiting the library. Reserved books will be held for you for 3 days. You\'ll receive a notification when your book is ready for pickup.',
-      icon: BookOpen
+      icon: 'BookOpen'
     },
     {
       question: 'What is the membership fee?',
       answer: 'Membership fees vary based on the type of membership you choose. We offer annual, half-yearly, and monthly membership plans. Please contact us or visit the library for detailed pricing information.',
-      icon: DollarSign
+      icon: 'DollarSign'
     },
     {
       question: 'Do you offer online book renewal?',
       answer: 'Yes! You can renew your books online through our member portal. Simply log in with your membership credentials and extend your borrowing period. You can also renew books in person or over the phone.',
-      icon: RefreshCw
+      icon: 'RefreshCw'
     },
     {
       question: 'Are there any late fees?',
       answer: 'Yes, we charge a nominal late fee for books returned after the due date. The fee is ₹5 per day per book. We encourage timely returns to avoid these charges and to ensure books are available for other members.',
-      icon: AlertCircle
+      icon: 'AlertCircle'
     },
     {
       question: 'Do you organize events or workshops?',
       answer: 'Absolutely! We regularly organize reading sessions, book discussions, workshops, and community events. Follow us on social media or check our notice board for upcoming events. All members are welcome to participate!',
-      icon: Calendar
+      icon: 'Calendar'
     }
   ];
+
+  const faqs = propFaqs && propFaqs.length > 0 ? propFaqs : defaultFaqs;
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -69,7 +94,8 @@ const FaqSection = () => {
         {/* FAQ Grid - Two Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
           {faqs.map((faq, index) => {
-            const Icon = faq.icon;
+            const iconName = typeof faq.icon === 'string' ? faq.icon : 'Clock';
+            const Icon = iconMap[iconName] || Clock;
             const isOpen = openIndex === index;
             const colors = [
               { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },

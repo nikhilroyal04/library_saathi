@@ -1,22 +1,37 @@
-import { notFound } from 'next/navigation';
-import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
-import { Scale, BookOpen, AlertCircle, CheckCircle, XCircle, FileText } from 'lucide-react';
+'use client';
 
-export default async function TermsPage({
-  params
-}: {
-  params: Promise<{ subdomain: string }>;
-}) {
-  const { subdomain } = await params;
-  const subdomainData = await getSubdomainData(subdomain);
-  const libraryDetails = await getLibraryDetails(subdomain);
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
+import { Scale, BookOpen, AlertCircle, CheckCircle, XCircle, FileText } from 'lucide-react';  
 
-  if (!subdomainData) {
-    notFound();
-  }
+interface TermsPageProps {
+  params: Promise<{ subdomain: string }> | { subdomain: string };
+}
 
-  const libraryName = libraryDetails?.name || `${subdomain} Library`;
-  const lastUpdated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+export default function TermsPage({ params }: TermsPageProps) {
+  const { subdomain } = useSubdomainParams(params);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchLibraries() as any);
+  }, [dispatch]);
+
+  const libraries = useSelector(selectLibraries);
+  const selectedLibrary = useMemo(() => {
+    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
+    return libraries.find(lib => lib?.subdomain === subdomain);
+  }, [libraries, subdomain]);
+
+  const libraryName = selectedLibrary?.name || `${subdomain} Library`;
+  const libraryDetails = selectedLibrary;
+  
+  // Use library terms if available, otherwise use default
+  const termsContent = selectedLibrary?.terms?.content;
+  const lastUpdated = selectedLibrary?.terms?.lastUpdated 
+    ? new Date(selectedLibrary.terms.lastUpdated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <div className="bg-white">
@@ -39,16 +54,25 @@ export default async function TermsPage({
 
         {/* Content */}
         <div className="bg-white rounded-lg border border-gray-200 p-8 md:p-10 space-y-8">
-          {/* Introduction */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-3">
-              <FileText className="w-6 h-6 text-blue-600" />
-              Introduction
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              Welcome to {libraryName}. By accessing and using our library services, you agree to comply with and be bound by the following terms and conditions. Please read these terms carefully before using our services.
-            </p>
-          </div>
+          {termsContent ? (
+            <div className="prose max-w-none">
+              <div 
+                className="text-gray-600 leading-relaxed whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: termsContent.replace(/\n/g, '<br />') }}
+              />
+            </div>
+          ) : (
+            <>
+              {/* Introduction */}
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-3">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                  Introduction
+                </h2>
+                <p className="text-gray-600 leading-relaxed">
+                  Welcome to {libraryName}. By accessing and using our library services, you agree to comply with and be bound by the following terms and conditions. Please read these terms carefully before using our services.
+                </p>
+              </div>
 
           {/* Membership Terms */}
           <div>
@@ -214,6 +238,8 @@ export default async function TermsPage({
               )}
             </div>
           </div>
+            </>
+          )}
         </div>
       </section>
     </div>

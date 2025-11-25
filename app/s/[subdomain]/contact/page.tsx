@@ -1,23 +1,34 @@
-import { notFound } from 'next/navigation';
-import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
+'use client';
+
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
 import { Mail, Phone, MapPin, Clock, Globe, MessageCircle } from 'lucide-react';
 import ContactForm from './contact-form';
 import TestimonialSection from '@/components/subdomain/testimonial-section';
 import FaqSection from '@/components/subdomain/faq-section';
 
-export default async function ContactPage({
-  params
-}: {
-  params: Promise<{ subdomain: string }>;
-}) {
-  const { subdomain } = await params;
-  const subdomainData = await getSubdomainData(subdomain);
-  const libraryDetails = await getLibraryDetails(subdomain);
+interface ContactPageProps {
+  params: Promise<{ subdomain: string }> | { subdomain: string };
+}
 
-  if (!subdomainData) {
-    notFound();
-  }
-  const libraryName = libraryDetails?.name || `${subdomain} Library`;
+export default function ContactPage({ params }: ContactPageProps) {
+  const { subdomain } = useSubdomainParams(params);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchLibraries() as any);
+  }, [dispatch]);
+
+  const libraries = useSelector(selectLibraries);
+  const selectedLibrary = useMemo(() => {
+    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
+    return libraries.find(lib => lib?.subdomain === subdomain);
+  }, [libraries, subdomain]);
+
+  const libraryName = selectedLibrary?.name || `${subdomain} Library`;
+  const libraryDetails = selectedLibrary;
 
   return (
     <div className="bg-white">
@@ -120,10 +131,10 @@ export default async function ContactPage({
       </section>
 
       {/* Testimonial Section */}
-      <TestimonialSection />
+      <TestimonialSection testimonials={selectedLibrary?.testimonials} />
 
       {/* FAQ Section */}
-      <FaqSection />
+      <FaqSection faqs={selectedLibrary?.faqs} />
     </div>
   );
 }

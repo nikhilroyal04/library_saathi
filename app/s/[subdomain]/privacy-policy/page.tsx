@@ -1,22 +1,37 @@
-import { notFound } from 'next/navigation';
-import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
+'use client';
+
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
 import { Shield, Lock, Eye, FileText, Database, UserCheck } from 'lucide-react';
 
-export default async function PrivacyPolicyPage({
-  params
-}: {
-  params: Promise<{ subdomain: string }>;
-}) {
-  const { subdomain } = await params;
-  const subdomainData = await getSubdomainData(subdomain);
-  const libraryDetails = await getLibraryDetails(subdomain);
+interface PrivacyPolicyPageProps {
+  params: Promise<{ subdomain: string }> | { subdomain: string };
+}
 
-  if (!subdomainData) {
-    notFound();
-  }
+export default function PrivacyPolicyPage({ params }: PrivacyPolicyPageProps) {
+  const { subdomain } = useSubdomainParams(params);
+  const dispatch = useDispatch();
 
-  const libraryName = libraryDetails?.name || `${subdomain} Library`;
-  const lastUpdated = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  useEffect(() => {
+    dispatch(fetchLibraries() as any);
+  }, [dispatch]);
+
+  const libraries = useSelector(selectLibraries);
+  const selectedLibrary = useMemo(() => {
+    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
+    return libraries.find(lib => lib?.subdomain === subdomain);
+  }, [libraries, subdomain]);
+
+  const libraryName = selectedLibrary?.name || `${subdomain} Library`;
+  const libraryDetails = selectedLibrary;
+  
+  // Use library privacy policy if available, otherwise use default
+  const privacyContent = selectedLibrary?.privacyPolicy?.content;
+  const lastUpdated = selectedLibrary?.privacyPolicy?.lastUpdated 
+    ? new Date(selectedLibrary.privacyPolicy.lastUpdated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <div className="bg-white">
@@ -39,16 +54,25 @@ export default async function PrivacyPolicyPage({
 
         {/* Content */}
         <div className="bg-white rounded-lg border border-gray-200 p-8 md:p-10 space-y-8">
-          {/* Introduction */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-3">
-              <FileText className="w-6 h-6 text-blue-600" />
-              Introduction
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              At {libraryName}, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our library services.
-            </p>
-          </div>
+          {privacyContent ? (
+            <div className="prose max-w-none">
+              <div 
+                className="text-gray-600 leading-relaxed whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: privacyContent.replace(/\n/g, '<br />') }}
+              />
+            </div>
+          ) : (
+            <>
+              {/* Introduction */}
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-3">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                  Introduction
+                </h2>
+                <p className="text-gray-600 leading-relaxed">
+                  At {libraryName}, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our library services.
+                </p>
+              </div>
 
           {/* Information We Collect */}
           <div>
@@ -208,6 +232,8 @@ export default async function PrivacyPolicyPage({
               )}
             </div>
           </div>
+            </>
+          )}
         </div>
       </section>
     </div>
