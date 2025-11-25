@@ -1,21 +1,44 @@
+'use client';
+
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
 import Link from 'next/link';
+import Image from 'next/image';
 import { protocol, rootDomain } from '@/lib/utils';
 import { Mail, Phone, MapPin, Home, Info, MessageCircle, BookOpen, Calendar, Image as ImageIcon, FileText } from 'lucide-react';
 
 type LibraryDetails = {
   name?: string;
+  logo?: string;
   email?: string;
   phone?: string;
   address?: string;
 };
 
 export default function SubdomainFooter({ 
-  libraryDetails,
+  libraryDetails: propLibraryDetails,
   subdomain 
 }: { 
   libraryDetails?: LibraryDetails;
   subdomain: string;
 }) {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchLibraries() as any);
+  }, [dispatch]);
+
+  const libraries = useSelector(selectLibraries);
+  const selectedLibrary = useMemo(() => {
+    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
+    return libraries.find(lib => lib?.subdomain === subdomain);
+  }, [libraries, subdomain]);
+
+  // Use Redux library data if available (has logo), otherwise use prop data
+  const libraryDetails = selectedLibrary && selectedLibrary.logo 
+    ? selectedLibrary 
+    : propLibraryDetails;
   const currentYear = new Date().getFullYear();
   const baseUrl = `${protocol}://${subdomain}.${rootDomain}`;
 
@@ -32,9 +55,26 @@ export default function SubdomainFooter({
           {/* About Section */}
           <div className="lg:col-span-1">
             <div className="mb-4">
-              <h3 className="text-xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                {libraryDetails?.name || `${subdomain} Library`}
-              </h3>
+              <Link href={baseUrl} className="flex items-center gap-3 group mb-3">
+                {libraryDetails?.logo ? (
+                  <div className="relative">
+                    <Image 
+                      src={libraryDetails.logo} 
+                      alt={libraryDetails.name || 'Library'} 
+                      width={48}
+                      height={48}
+                      className="h-12 w-12 rounded-lg object-cover ring-2 ring-gray-700/50 group-hover:ring-blue-500 transition-all duration-300 shadow-lg"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600 flex items-center justify-center shadow-lg ring-2 ring-gray-700/50 group-hover:ring-blue-500 transition-all duration-300">
+                    <span className="text-xl">🏛️</span>
+                  </div>
+                )}
+                <h3 className="text-xl font-extrabold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  {libraryDetails?.name || `${subdomain} Library`}
+                </h3>
+              </Link>
               <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mb-4"></div>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed font-medium">

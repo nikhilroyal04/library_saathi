@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
 import Link from 'next/link';
 import Image from 'next/image';
 import { protocol, rootDomain } from '@/lib/utils';
@@ -23,13 +25,30 @@ const navItems = [
 ];
 
 export default function SubdomainHeader({ 
-  libraryDetails,
+  libraryDetails: propLibraryDetails,
   subdomain 
 }: { 
   libraryDetails?: LibraryDetails;
   subdomain: string;
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dispatch = useDispatch();
+  
+  useEffect(() => {
+    dispatch(fetchLibraries() as any);
+  }, [dispatch]);
+
+  const libraries = useSelector(selectLibraries);
+  const selectedLibrary = useMemo(() => {
+    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
+    return libraries.find(lib => lib?.subdomain === subdomain);
+  }, [libraries, subdomain]);
+
+  // Use Redux library data if available (has logo), otherwise use prop data
+  const libraryDetails = selectedLibrary && selectedLibrary.logo 
+    ? selectedLibrary 
+    : propLibraryDetails;
+  
   // Base URL for links in the subdomain
   const baseUrl = `${protocol}://${subdomain}.${rootDomain}`;
 
