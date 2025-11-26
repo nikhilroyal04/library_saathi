@@ -1,6 +1,7 @@
 'use client';
 
-import { Star } from 'lucide-react';
+import { Star, UserIcon } from 'lucide-react';
+import Image from 'next/image';
 
 interface Testimonial {
   name: string;
@@ -16,43 +17,9 @@ interface TestimonialSectionProps {
 }
 
 const TestimonialSection = ({ testimonials: propTestimonials }: TestimonialSectionProps) => {
-  // Default testimonials if no data provided
-  const defaultTestimonials = [
-    {
-      name: 'Dr. Priya Sharma',
-      role: 'Regular Member',
-      library: 'Member since 2020',
-      image: '👩‍💼',
-      rating: 5,
-      text: 'This library has been a wonderful place for my studies. The peaceful environment and helpful staff make it the perfect spot for reading and learning.'
-    },
-    {
-      name: 'Rajesh Kumar',
-      role: 'Student Member',
-      library: 'Member since 2021',
-      image: '👨‍💼',
-      rating: 5,
-      text: 'The multiple shift timings are so convenient! I can visit the library at different times based on my schedule. The staff is always helpful and the collection is impressive.'
-    },
-    {
-      name: 'Anita Desai',
-      role: 'Regular Member',
-      library: 'Member since 2019',
-      image: '👩‍💻',
-      rating: 5,
-      text: 'I love this library! The book collection is extensive, the reading spaces are comfortable, and the staff goes above and beyond to help. Highly recommended!'
-    },
-    {
-      name: 'Mohammed Ali',
-      role: 'Regular Member',
-      library: 'Member since 2022',
-      image: '👨‍💻',
-      rating: 5,
-      text: 'The library facilities are excellent! The quiet study zones, modern reading spaces, and well-maintained books make it my favorite place to study and read.'
-    }
-  ];
 
-  const testimonials = propTestimonials && propTestimonials.length > 0 ? propTestimonials : defaultTestimonials;
+
+  const testimonials = propTestimonials && propTestimonials.length > 0 ? propTestimonials : [];
 
   // Duplicate testimonials for seamless scrolling
   const duplicatedTestimonials = [...testimonials, ...testimonials, ...testimonials];
@@ -89,7 +56,13 @@ const TestimonialSection = ({ testimonials: propTestimonials }: TestimonialSecti
       {/* Author Info */}
       <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
         <div className={`w-12 h-12 ${color.bg} rounded-lg flex items-center justify-center text-xl`}>
-          {testimonial.image || '👤'}
+          {testimonial.image ? (
+            <Image src={testimonial.image} alt={testimonial.name} width={48} height={48} className="rounded-lg object-cover" />
+          ) : (
+            <span role="img" aria-label={testimonial.name} className="text-2xl">
+              <UserIcon className="w-4 h-4" />
+            </span>
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-gray-900 text-sm mb-0.5 truncate">

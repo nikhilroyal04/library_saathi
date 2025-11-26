@@ -3,7 +3,6 @@ import { getSubdomainData, getLibraryDetails } from '@/lib/subdomains';
 import SubdomainHeader from '@/components/subdomain/Header';
 import Topbar from '@/components/subdomain/Topbar';
 import SubdomainFooter from '@/components/subdomain/Footer';
-import { ReduxProvider } from '@/lib/store/provider';
 
 export default async function SubdomainLayout({
   children,
@@ -22,7 +21,6 @@ export default async function SubdomainLayout({
   const libraryDetails = await getLibraryDetails(subdomain);
 
   return (
-    <ReduxProvider>
       <div className="flex flex-col min-h-screen">
         <Topbar />
         <SubdomainHeader libraryDetails={libraryDetails || undefined} subdomain={subdomain} />
@@ -31,7 +29,6 @@ export default async function SubdomainLayout({
         </main>
         <SubdomainFooter libraryDetails={libraryDetails || undefined} subdomain={subdomain} />
       </div>
-    </ReduxProvider>
   );
 }
 

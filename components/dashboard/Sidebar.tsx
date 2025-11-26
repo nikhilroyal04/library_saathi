@@ -6,7 +6,8 @@ import {
   LayoutDashboard, 
   Globe, 
   Settings, 
-  TrendingUp
+  TrendingUp,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +15,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Subdomains', href: '/dashboard/subdomains', icon: Globe },
   { name: 'Leads', href: '/dashboard/leads', icon: TrendingUp },
+  { name: 'Library Leads', href: '/dashboard/library-leads', icon: Users }, 
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
@@ -30,7 +32,6 @@ export default function Sidebar() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-gray-900">Library Saathi</h1>
-            <p className="text-xs text-gray-500">Dashboard</p>
           </div>
         </Link>
       </div>
@@ -38,7 +39,8 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+          // Each menu item should be active ONLY on its exact href
+          const isActive = pathname === item.href;
           return (
             <Link
               key={item.name}
@@ -61,9 +63,9 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="px-3 py-2 text-xs text-gray-500">
-          <p className="font-medium text-gray-700 mb-1">Library Saathi</p>
+      <div className="p-2.5 border-t border-gray-200 sticky text-center">
+        <div className="px-3 text-xs text-gray-500">
+          <p className="font-medium text-gray-700">Library Saathi</p>
           <p>Version 1.0.0</p>
         </div>
       </div>

@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Clock, Calendar, Users, RotateCcw } from 'lucide-react';
 
 interface Shift {
@@ -20,6 +19,39 @@ interface ShiftPlanSectionProps {
 }
 
 const ShiftPlanSection = ({ shifts: propShifts }: ShiftPlanSectionProps) => {
+  // Map icon names to emojis
+  const getIconEmoji = (icon?: string): string => {
+    if (!icon) return '📚';
+    
+    // If it's already an emoji (contains emoji characters), return as is
+    const emojiPattern = /[\p{Emoji}]/u;
+    if (emojiPattern.test(icon)) {
+      return icon;
+    }
+    
+    // Map text names to emojis
+    const iconMap: Record<string, string> = {
+      'sun': '☀️',
+      'sunrise': '🌅',
+      'moon': '🌙',
+      'morning': '🌅',
+      'afternoon': '☀️',
+      'evening': '🌆',
+      'night': '🌙',
+      'dawn': '🌅',
+      'dusk': '🌆',
+      'day': '☀️',
+      'stars': '⭐',
+      'book': '📚',
+      'library': '📖',
+      'clock': '🕐',
+      'time': '⏰'
+    };
+    
+    const iconLower = icon.toLowerCase().trim();
+    return iconMap[iconLower] || icon; // Return mapped emoji or original if not found
+  };
+
   // Default shifts if no data provided
   const defaultShifts: Shift[] = [
     {
@@ -76,7 +108,7 @@ const ShiftPlanSection = ({ shifts: propShifts }: ShiftPlanSectionProps) => {
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className={`p-2 ${color.bg} rounded-lg`}>
-                  <span className="text-2xl">{shift.icon || '📚'}</span>
+                  <span className="text-2xl">{getIconEmoji(shift.icon)}</span>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">

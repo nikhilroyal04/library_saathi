@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail, Phone, Calendar, Search, MessageSquare, FileText } from 'lucide-react';
+import { Mail, Phone, Calendar, Search, Filter, MessageSquare, Building2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { 
   fetchLeads, 
@@ -12,8 +12,8 @@ import {
   selectLoading, 
   selectError,
   updateLead,
-  type Lead 
-} from '@/lib/store/leadSlice';
+  type LibraryLead 
+} from '@/lib/store/libraryLeadSlice';
 import { toast } from 'sonner';
 import {
   Select,
@@ -41,7 +41,7 @@ export default function LeadsOverview() {
     const matchesSearch = 
       lead.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       lead.mobileNumber.includes(searchQuery) ||
-      lead.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lead.library.toLowerCase().includes(searchQuery.toLowerCase()) ||
       lead.message.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
@@ -49,7 +49,7 @@ export default function LeadsOverview() {
     return matchesSearch && matchesStatus;
   }) || [];
 
-  const getStatusColor = (status: Lead['status']) => {
+  const getStatusColor = (status: LibraryLead['status']) => {
     switch (status) {
       case 'new':
         return 'bg-blue-100 text-blue-800';
@@ -64,7 +64,7 @@ export default function LeadsOverview() {
     }
   };
 
-  const handleStatusChange = async (leadId: string, newStatus: Lead['status']) => {
+  const handleStatusChange = async (leadId: string, newStatus: LibraryLead['status']) => {
     try {
       const result = await dispatch(updateLead(leadId, { status: newStatus }) as any);
       if (result.success) {
@@ -82,7 +82,7 @@ export default function LeadsOverview() {
     return (
       <div className="space-y-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Library Leads</h1>
           <p className="text-sm text-gray-500 mt-2">
             Manage and track your leads from library registrations
           </p>
@@ -103,7 +103,7 @@ export default function LeadsOverview() {
     return (
       <div className="space-y-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Library Leads</h1>
           <p className="text-sm text-gray-500 mt-2">
             Manage and track your leads from library registrations
           </p>
@@ -126,7 +126,7 @@ export default function LeadsOverview() {
     <div className="space-y-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Library Leads</h1>
         <p className="text-sm text-gray-500 mt-2">
           Manage and track your leads from library registrations
         </p>
@@ -136,7 +136,7 @@ export default function LeadsOverview() {
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <CardTitle>All Leads ({filteredLeads.length})</CardTitle>
+            <CardTitle>All Library Leads ({filteredLeads.length})</CardTitle>
             <div className="flex gap-2 w-full sm:w-auto">
               <div className="relative flex-1 sm:flex-initial">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -195,12 +195,10 @@ export default function LeadsOverview() {
                             <Phone className="w-4 h-4" />
                             {lead.mobileNumber}
                           </div>
-                          {lead.subject && (
-                            <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4" />
-                              {lead.subject}
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4" />
+                            {lead.library}
+                          </div>
                           {lead.message && (
                             <div className="flex items-start gap-2">
                               <MessageSquare className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -224,7 +222,7 @@ export default function LeadsOverview() {
                       <div className="flex flex-col gap-2">
                         <Select
                           value={lead.status}
-                          onValueChange={(value) => handleStatusChange(lead._id!, value as Lead['status'])}
+                          onValueChange={(value) => handleStatusChange(lead._id!, value as LibraryLead['status'])}
                         >
                           <SelectTrigger className="w-[140px]">
                             <SelectValue />

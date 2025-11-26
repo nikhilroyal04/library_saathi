@@ -9,6 +9,7 @@ export interface Library {
   logo?: string;
   subdomain: string;
   emoji?: string;
+  topbar?: string;
   email?: string;
   phone?: string;
   address?: string;
@@ -68,6 +69,9 @@ export interface Library {
     content?: string;
     lastUpdated?: Date;
   };
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -101,6 +105,31 @@ export const librarySlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+    addLibrary: (state, action: PayloadAction<Library>) => {
+      if (state.libraries) {
+        state.libraries = [...state.libraries, action.payload];
+      } else {
+        state.libraries = [action.payload];
+      }
+      state.loading = false;
+      state.error = null;
+    },
+    updateLibrary: (state, action: PayloadAction<Library>) => {
+      if (state.libraries) {
+        state.libraries = state.libraries.map(lib =>
+          lib._id === action.payload._id ? { ...lib, ...action.payload } : lib
+        );
+      }
+      state.loading = false;
+      state.error = null;
+    },
+    deleteLibrary: (state, action: PayloadAction<string>) => {
+      if (state.libraries) {
+        state.libraries = state.libraries.filter(lib => lib._id !== action.payload);
+      }
+      state.loading = false;
+      state.error = null;
+    },
   },
 });
 
@@ -116,13 +145,108 @@ export const fetchLibraries = () => async (dispatch: AppDispatch) => {
     }
   } catch (error) {
     dispatch(setError((error as Error).message));
-  }
-  finally {
+  } finally {
     dispatch(setLoading(false));
   }
 };
 
-export const { setLibraries, setLoading, setError } = librarySlice.actions;
+// Helper function to convert a Library or Partial<Library> into FormData
+function toLibraryFormData(library: any): FormData {
+  const formData = new FormData();
+  for (const key in library) {
+    const value = library[key];
+    if (value === undefined || value === null) continue;
+
+    // Handle File/Image type 'logo' or 'image' fields if present
+    if ((key === 'logo' || key === 'image') && typeof value !== 'string') {
+      formData.append(key, value);
+      continue;
+    }
+
+    // For complex objects & arrays except File, stringify them
+    if (typeof value === 'object' && !(value instanceof File) && !(value instanceof Blob)) {
+      formData.append(key, JSON.stringify(value));
+    } else {
+      formData.append(key, value);
+    }
+  }
+  return formData;
+}
+
+export const createLibrary = (library: Library) => async (dispatch: AppDispatch) => {
+  dispatch(setLoading(true));
+  dispatch(setError(null));
+  try {
+    const formData = toLibraryFormData(library);
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/libraries/newLibrary`,
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
+    if (response.data && response.data.success) {
+      dispatch(addLibrary(response.data.data.library || library));
+    } else {
+      dispatch(setError(response.data?.message || 'Failed to create library'));
+    }
+  } catch (error) {
+    dispatch(setError((error as Error).message));
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+export const updateLibrary = (id: string, updates: Partial<Library>) => async (dispatch: AppDispatch) => {
+  dispatch(setLoading(true));
+  dispatch(setError(null));
+  try {
+    const formData = toLibraryFormData(updates);
+    const response = await axios.put(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/libraries/updateLibrary/${id}`,
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
+    if (response.data && response.data.success) {
+      dispatch(updateLibraryAction(response.data.data.library || { _id: id, ...updates }));
+    } else {
+      dispatch(setError(response.data?.message || 'Failed to update library'));
+    }
+  } catch (error) {
+    dispatch(setError((error as Error).message));
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+export const deleteLibrary = (id: string) => async (dispatch: AppDispatch) => {
+  dispatch(setLoading(true));
+  dispatch(setError(null));
+  try {
+    const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_BASE_URL}/libraries/deleteLibrary/${id}`);
+    if (response.data && response.data.success) {
+      dispatch(deleteLibraryAction(id));
+    } else {
+      dispatch(setError(response.data?.message || 'Failed to delete library'));
+    }
+  } catch (error) {
+    dispatch(setError((error as Error).message));
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+// Export actions separately for use in thunks
+export const {
+  setLibraries,
+  setLoading,
+  setError,
+  addLibrary,
+  updateLibrary: updateLibraryAction,
+  deleteLibrary: deleteLibraryAction,
+} = librarySlice.actions;
 
 export const selectLibraries = (state: RootState) => state.library.libraries;
 export const selectLoading = (state: RootState) => state.library.loading;

@@ -29,52 +29,37 @@ export default function ShiftPlansPage({ params }: ShiftPlansPageProps) {
   const libraryName = selectedLibrary?.name || `${subdomain} Library`;
 
   // Default shifts if no data provided
-  const defaultShifts = [
-    {
-      name: 'Morning Shift',
-      time: '8:00 AM - 12:00 PM',
-      icon: '🌅',
-      color: 'orange',
-      description: 'Start your day with our morning shift. Perfect for early birds and morning study sessions.',
-      features: ['Quiet study environment', 'Fresh morning atmosphere', 'Early access to resources', 'Morning refreshments available'],
-      status: 'active',
-      capacity: '85%',
-      staffCount: 3
-    },
-    {
-      name: 'Afternoon Shift',
-      time: '12:00 PM - 4:00 PM',
-      icon: '☀️',
-      color: 'yellow',
-      description: 'The busiest shift of the day. Ideal for group studies and collaborative work.',
-      features: ['High activity period', 'Group study areas', 'Lunch break facilities', 'Maximum staff availability'],
-      status: 'active',
-      capacity: '95%',
-      staffCount: 5
-    },
-    {
-      name: 'Evening Shift',
-      time: '4:00 PM - 8:00 PM',
-      icon: '🌆',
-      color: 'purple',
-      description: 'Perfect for evening learners and after-work study sessions.',
-      features: ['Post-work study time', 'Evening programs', 'Extended hours', 'Relaxed atmosphere'],
-      status: 'active',
-      capacity: '70%',
-      staffCount: 4
-    },
-    {
-      name: 'Night Shift',
-      time: '8:00 PM - 12:00 AM',
-      icon: '🌙',
-      color: 'indigo',
-      description: 'Late-night study sessions for night owls and dedicated learners.',
-      features: ['24/7 access available', 'Quiet night environment', 'Night study support', 'Limited staff'],
-      status: 'limited',
-      capacity: '45%',
-      staffCount: 2
+  const getIconEmoji = (icon?: string): string => {
+    if (!icon) return '📚';
+    
+    // If it's already an emoji (contains emoji characters), return as is
+    const emojiPattern = /[\p{Emoji}]/u;
+    if (emojiPattern.test(icon)) {
+      return icon;
     }
-  ];
+    
+    // Map text names to emojis
+    const iconMap: Record<string, string> = {
+      'sun': '☀️',
+      'sunrise': '🌅',
+      'moon': '🌙',
+      'morning': '🌅',
+      'afternoon': '☀️',
+      'evening': '🌆',
+      'night': '🌙',
+      'dawn': '🌅',
+      'dusk': '🌆',
+      'day': '☀️',
+      'stars': '⭐',
+      'book': '📚',
+      'library': '📖',
+      'clock': '🕐',
+      'time': '⏰'
+    };
+    
+    const iconLower = icon.toLowerCase().trim();
+    return iconMap[iconLower] || icon; // Return mapped emoji or original if not found
+  };
 
   // Valid colors for shifts
   const validColors = ['orange', 'yellow', 'purple', 'indigo'];
@@ -97,7 +82,7 @@ export default function ShiftPlansPage({ params }: ShiftPlansPageProps) {
           staffCount: shift.staffCount || 0
         };
       })
-    : defaultShifts;
+    :   [];
 
   const colorClasses: Record<string, { bg: string; border: string; icon: string; text: string }> = {
     orange: { bg: 'bg-orange-50', border: 'border-orange-200', icon: 'text-orange-600', text: 'text-orange-700' },
@@ -156,7 +141,7 @@ export default function ShiftPlansPage({ params }: ShiftPlansPageProps) {
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className={`p-3 ${colors.bg} rounded-lg`}>
-                  <span className="text-4xl">{shift.icon}</span>
+                  <span className="text-4xl">{getIconEmoji(shift.icon)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {shift.status === 'active' ? (

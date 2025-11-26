@@ -92,11 +92,6 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed font-medium">
                 {libraryDescription}
               </p>
-              <p className="text-base text-gray-600 leading-relaxed">
-                Welcome to our library! We offer a peaceful reading environment, 
-                extensive book collection, and excellent services for all our members. 
-                Join us and discover the joy of reading.
-              </p>
             </div>
 
             {/* Key Features */}
@@ -121,29 +116,6 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
               </div>
             </div>
 
-            {/* Contact Info */}
-            {(libraryDetails?.email || libraryDetails?.phone) && (
-              <div className="flex flex-wrap gap-3 pt-1">
-                {libraryDetails.email && (
-                  <a 
-                    href={`mailto:${libraryDetails.email}`}
-                    className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors font-semibold"
-                  >
-                    <Mail className="w-4 h-4" />
-                    <span className="text-xs">{libraryDetails.email}</span>
-                  </a>
-                )}
-                {libraryDetails.phone && (
-                  <a 
-                    href={`tel:${libraryDetails.phone}`}
-                    className="flex items-center gap-2 text-gray-700 hover:text-green-600 transition-colors font-semibold"
-                  >
-                    <Phone className="w-4 h-4" />
-                    <span className="text-xs">{libraryDetails.phone}</span>
-                  </a>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Right Column - Booking Form */}
