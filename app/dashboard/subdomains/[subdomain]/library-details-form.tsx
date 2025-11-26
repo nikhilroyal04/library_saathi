@@ -7,12 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { saveLibraryDetailsAction } from '@/actions';
-import { 
-  ArrowLeft, 
-  Save, 
-  Globe, 
-  Image as ImageIcon, 
-  X, 
+import {
+  ArrowLeft,
+  Save,
+  Globe,
+  Image as ImageIcon,
+  X,
   Upload,
   Info,
   Users,
@@ -27,7 +27,7 @@ import { protocol, rootDomain } from '@/lib/utils';
 import type { LibraryDetails } from '@/lib/subdomains';
 import type { Library } from '@/lib/store/librarySlice';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectLibraries, updateLibrary, fetchLibraries } from '@/lib/store/librarySlice';
+import { selectLibraries, selectError, updateLibrary, fetchLibraries } from '@/lib/store/librarySlice';
 import { useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import ContactTab from './components/contact-tab';
@@ -69,7 +69,7 @@ export default function LibraryDetailsForm({
 
   // Use Redux data if available, otherwise use initialData
   const formData = libraryData || (initialData as ExtendedLibraryDetails);
-  
+
   // Logo state
   const [logoPreview, setLogoPreview] = useState<string | null>(formData.logo || null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -94,7 +94,7 @@ export default function LibraryDetailsForm({
     try {
       const form = e.currentTarget;
       const formDataObj = new FormData(form);
-      
+
       // Collect shifts data
       const shifts: any[] = [];
       let shiftIndex = 0;
@@ -162,7 +162,13 @@ export default function LibraryDetailsForm({
         galleryIndex++;
       }
 
-      // Build library update object
+      // Get customDomain from form and ensure it's in FormData for Redis
+      const customDomain = formDataObj.get('customDomain') as string || (formData as ExtendedLibraryDetails).customDomain || initialData?.customDomain || '';
+      if (customDomain) {
+        formDataObj.set('customDomain', customDomain);
+      }
+
+      // Build library update object (customDomain is saved to Redis only, not Redux/MongoDB)
       const updates: Partial<Library> = {
         name: formDataObj.get('name') as string || formData.name,
         description: formDataObj.get('description') as string || formData.description,
@@ -190,21 +196,35 @@ export default function LibraryDetailsForm({
       };
 
       if (libraryData?._id) {
-        const result = await dispatch(updateLibrary(libraryData._id, updates) as any);
-        if (result.error) {
-          setSubmitError(result.error);
-          toast.error(result.error);
+        // Update in Redux/MongoDB
+        try {
+          await dispatch(updateLibrary(libraryData._id, updates) as any);
+        } catch (reduxError) {
+          const errorMsg = (reduxError as Error).message || 'Failed to update library in database';
+          setSubmitError(errorMsg);
+          toast.error(errorMsg);
+          return;
+        }
+        
+        // Save to Redis (including customDomain) via action
+        const redisResult = await saveLibraryDetailsAction(undefined, formDataObj);
+        if (redisResult.error) {
+          setSubmitError(redisResult.error);
+          toast.error(redisResult.error);
         } else {
           setSubmitSuccess(true);
           toast.success('Library updated successfully!');
-          // Also save to Redis via action
-          await saveLibraryDetailsAction(undefined, formDataObj);
         }
       } else {
-        // If no library in Redux, just save to Redis
-        await saveLibraryDetailsAction(undefined, formDataObj);
-        setSubmitSuccess(true);
-        toast.success('Library details saved successfully!');
+        // If no library in Redux, just save to Redis (including customDomain)
+        const redisResult = await saveLibraryDetailsAction(undefined, formDataObj);
+        if (redisResult.error) {
+          setSubmitError(redisResult.error);
+          toast.error(redisResult.error);
+        } else {
+          setSubmitSuccess(true);
+          toast.success('Library details saved successfully!');
+        }
       }
     } catch (error) {
       const errorMessage = (error as Error).message || 'Failed to update library';
@@ -307,38 +327,38 @@ export default function LibraryDetailsForm({
 
           {/* Basic Tab */}
           <TabsContent value="basic">
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>Essential details about your library</CardDescription>
-          </CardHeader>
+            <Card>
+              <CardHeader>
+                <CardTitle>Basic Information</CardTitle>
+                <CardDescription>Essential details about your library</CardDescription>
+              </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="name">Library Name *</Label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="e.g., Central Library"
+                    <Label htmlFor="name">Library Name *</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      type="text"
+                      placeholder="e.g., Central Library"
                       defaultValue={formData.name}
-                required
-              />
-            </div>
+                      required
+                    />
+                  </div>
 
                   <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="description">Description</Label>
-              <textarea
-                id="description"
-                name="description"
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Tell visitors about your library..."
+                    <Label htmlFor="description">Description</Label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Tell visitors about your library..."
                       defaultValue={formData.description}
-              />
-            </div>
+                    />
+                  </div>
 
-            <div className="space-y-2">
+                  <div className="space-y-2">
                     <Label htmlFor="emoji">Emoji Icon</Label>
                     <Input
                       id="emoji"
@@ -385,10 +405,10 @@ export default function LibraryDetailsForm({
                             <Upload className="w-4 h-4" />
                             Choose Logo
                           </Button>
-              <Input
-                id="logo"
-                name="logo"
-                type="url"
+                          <Input
+                            id="logo"
+                            name="logo"
+                            type="url"
                             placeholder="Or enter logo URL"
                             defaultValue={formData.logo}
                             onChange={(e) => setLogoPreview(e.target.value || null)}
@@ -417,9 +437,9 @@ export default function LibraryDetailsForm({
                       )}
                     </div>
                   </div>
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Contact Tab */}
@@ -464,48 +484,48 @@ export default function LibraryDetailsForm({
 
           {/* Custom Domain Tab */}
           <TabsContent value="custom-domain">
-        <Card className="border-blue-200 bg-blue-50/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="w-5 h-5 text-blue-600" />
-              Custom Domain
-            </CardTitle>
-            <CardDescription>
-              Connect your own domain (e.g., tenant.vikrantrathi.com). This will point to your subdomain.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="customDomain">Custom Domain</Label>
-              <Input
-                id="customDomain"
-                name="customDomain"
-                type="text"
-                placeholder="tenant.vikrantrathi.com"
-                defaultValue={initialData.customDomain}
-              />
+            <Card className="border-blue-200 bg-blue-50/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-blue-600" />
+                  Custom Domain
+                </CardTitle>
+                <CardDescription>
+                  Connect your own domain (e.g., tenant.vikrantrathi.com). This will point to your subdomain.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="customDomain">Custom Domain</Label>
+                  <Input
+                    id="customDomain"
+                    name="customDomain"
+                    type="text"
+                    placeholder="tenant.vikrantrathi.com"
+                    defaultValue={initialData.customDomain}
+                  />
                   <div className="space-y-2 text-xs text-gray-600 mt-4">
-                <p className="font-medium">Steps to setup custom domain:</p>
-                <ol className="list-decimal list-inside space-y-1 ml-2">
-                  <li>Enter your custom domain above (without http:// or https://)</li>
-                  <li>Save this form</li>
-                  <li>Add CNAME record in your DNS provider:
-                    <br />
-                    <code className="text-xs bg-white px-2 py-1 rounded border mt-1 inline-block">
-                      {initialData.customDomain || 'tenant.vikrantrathi.com'} → CNAME → {subdomain}.{rootDomain}
-                    </code>
-                  </li>
-                  <li>If using Vercel, also add this domain in Vercel Dashboard → Settings → Domains</li>
-                  <li>Wait 5-60 minutes for DNS propagation</li>
-                </ol>
-                <p className="text-xs text-gray-500 mt-2">
-                      Example: If your custom domain is <code>tenant.vikrantrathi.com</code> and subdomain is <code>{subdomain}.{rootDomain}</code>, 
+                    <p className="font-medium">Steps to setup custom domain:</p>
+                    <ol className="list-decimal list-inside space-y-1 ml-2">
+                      <li>Enter your custom domain above (without http:// or https://)</li>
+                      <li>Save this form</li>
+                      <li>Add CNAME record in your DNS provider:
+                        <br />
+                        <code className="text-xs bg-white px-2 py-1 rounded border mt-1 inline-block">
+                          {initialData.customDomain || 'tenant.vikrantrathi.com'} → CNAME → {subdomain}.{rootDomain}
+                        </code>
+                      </li>
+                      <li>If using Vercel, also add this domain in Vercel Dashboard → Settings → Domains</li>
+                      <li>Wait 5-60 minutes for DNS propagation</li>
+                    </ol>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Example: If your custom domain is <code>tenant.vikrantrathi.com</code> and subdomain is <code>{subdomain}.{rootDomain}</code>,
                       add CNAME: <code>tenant.vikrantrathi.com → {subdomain}.{rootDomain}</code>
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
