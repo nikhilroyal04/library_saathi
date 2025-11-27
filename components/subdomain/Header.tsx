@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchLibraries, selectLibraries, findLibraryBySubdomainOrCustomDomain } from '@/lib/store/librarySlice';
 import Link from 'next/link';
 import Image from 'next/image';
-import { protocol, rootDomain } from '@/lib/utils';
 
 type LibraryDetails = {
   name?: string;
@@ -48,15 +47,12 @@ export default function SubdomainHeader({
     ? selectedLibrary 
     : propLibraryDetails;
   
-  // Base URL for links in the subdomain
-  const baseUrl = `${protocol}://${subdomain}.${rootDomain}`;
-
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50 border-b-2 border-gray-200 backdrop-blur-sm bg-white/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo and Name */}
-          <Link href={baseUrl} className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group">
             {libraryDetails?.logo ? (
               <div className="relative">
                 <Image 
@@ -84,7 +80,7 @@ export default function SubdomainHeader({
             {navItems.map(item => (
               <Link 
                 key={item.href}
-                href={`${baseUrl}${item.href === '/' ? '' : item.href}`}
+                href={item.href}
                 className="text-gray-800 font-bold text-md hover:text-blue-600 transition-all duration-200 relative group py-2"
               >
                 {item.label}
@@ -92,7 +88,7 @@ export default function SubdomainHeader({
               </Link>
             ))}
             <Link
-              href={`${baseUrl}/book-now`}
+              href="/book-now"
               className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2 rounded-lg font-bold text-sm hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 ml-3 border border-blue-500/20"
             >
               Book Now
@@ -123,7 +119,7 @@ export default function SubdomainHeader({
             {navItems.map(item => (
               <Link 
                 key={item.href}
-                href={`${baseUrl}${item.href === '/' ? '' : item.href}`}
+                href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block text-gray-800 font-bold text-sm hover:text-blue-600 transition-colors py-2 px-2 rounded-lg hover:bg-blue-50"
               >
@@ -131,7 +127,7 @@ export default function SubdomainHeader({
               </Link>
             ))}
             <Link
-              href={`${baseUrl}/book-now`}
+              href="/book-now"
               onClick={() => setIsMobileMenuOpen(false)}
               className="block bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-lg font-bold text-center hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md mt-3 text-sm"
             >

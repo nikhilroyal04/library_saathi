@@ -39,7 +39,6 @@ export default function SubdomainFooter({
     ? selectedLibrary 
     : propLibraryDetails;
   const currentYear = new Date().getFullYear();
-  const baseUrl = `${protocol}://${subdomain}.${rootDomain}`;
 
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white mt-auto relative overflow-hidden">
@@ -54,7 +53,7 @@ export default function SubdomainFooter({
           {/* About Section */}
           <div className="lg:col-span-1">
             <div className="mb-4">
-              <Link href={baseUrl} className="flex items-center gap-3 group mb-3">
+              <Link href="/" className="flex items-center gap-3 group mb-3">
                 {libraryDetails?.logo ? (
                   <div className="relative">
                     <Image 
@@ -87,7 +86,7 @@ export default function SubdomainFooter({
             <ul className="space-y-3">
               <li>
                 <Link 
-                  href={baseUrl} 
+                  href="/" 
                   className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-200 group text-sm font-medium"
                 >
                   <Home className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -96,7 +95,7 @@ export default function SubdomainFooter({
               </li>
               <li>
                 <Link 
-                  href={`${baseUrl}/about`} 
+                  href="/about" 
                   className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-200 group text-sm font-medium"
                 >
                   <Info className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -105,7 +104,7 @@ export default function SubdomainFooter({
               </li>
               <li>
                 <Link 
-                  href={`${baseUrl}/contact`} 
+                  href="/contact" 
                   className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-200 group text-sm font-medium"
                 >
                   <MessageCircle className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -114,7 +113,7 @@ export default function SubdomainFooter({
               </li>
               <li>
                 <Link 
-                  href={`${baseUrl}/gallery`} 
+                  href="/gallery" 
                   className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-200 group text-sm font-medium"
                 >
                   <ImageIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -130,7 +129,7 @@ export default function SubdomainFooter({
             <ul className="space-y-3">
               <li>
                 <Link 
-                  href={`${baseUrl}/shift-plans`} 
+                  href="/shift-plans" 
                   className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-200 group text-sm font-medium"
                 >
                   <Calendar className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -139,7 +138,7 @@ export default function SubdomainFooter({
               </li>
               <li>
                 <Link 
-                  href={`${baseUrl}/facilities`} 
+                  href="/facilities" 
                   className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-200 group text-sm font-medium"
                 >
                   <BookOpen className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -148,7 +147,7 @@ export default function SubdomainFooter({
               </li>
               <li>
                 <Link 
-                  href={`${baseUrl}/book-now`} 
+                  href="/book-now" 
                   className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-200 group text-sm font-medium"
                 >
                   <Calendar className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -164,7 +163,7 @@ export default function SubdomainFooter({
             <ul className="space-y-3">
               <li>
                 <Link 
-                  href={`${baseUrl}/privacy-policy`} 
+                  href="/privacy-policy" 
                   className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-200 group text-sm font-medium"
                 >
                   <FileText className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -173,7 +172,7 @@ export default function SubdomainFooter({
               </li>
               <li>
                 <Link 
-                  href={`${baseUrl}/terms`} 
+                  href="/terms" 
                   className="flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-200 group text-sm font-medium"
                 >
                   <FileText className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
