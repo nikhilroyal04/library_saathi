@@ -167,7 +167,7 @@ export async function loginAction(
   }
 
   // Create session
-  const isAdmin = email === 'admin@librarysaathi.com';
+  const isAdmin = email === 'admin@librarysaathi.in';
   const sessionId = await createSession(email, undefined, isAdmin);
   await setSessionCookie(sessionId);
 

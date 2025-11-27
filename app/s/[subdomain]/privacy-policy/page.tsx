@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { fetchLibraries, selectLibraries, findLibraryBySubdomainOrCustomDomain } from '@/lib/store/librarySlice';
 import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
 import { Shield, Lock, Eye, FileText, Database, UserCheck } from 'lucide-react';
 
@@ -20,8 +20,7 @@ export default function PrivacyPolicyPage({ params }: PrivacyPolicyPageProps) {
 
   const libraries = useSelector(selectLibraries);
   const selectedLibrary = useMemo(() => {
-    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
-    return libraries.find(lib => lib?.subdomain === subdomain);
+    return findLibraryBySubdomainOrCustomDomain(libraries, subdomain);
   }, [libraries, subdomain]);
 
   const libraryName = selectedLibrary?.name || `${subdomain} Library`;
@@ -63,16 +62,16 @@ export default function PrivacyPolicyPage({ params }: PrivacyPolicyPageProps) {
             </div>
           ) : (
             <>
-              {/* Introduction */}
-              <div>
+          {/* Introduction */}
+          <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-3">
-                  <FileText className="w-6 h-6 text-blue-600" />
-                  Introduction
-                </h2>
+              <FileText className="w-6 h-6 text-blue-600" />
+              Introduction
+            </h2>
                 <p className="text-gray-600 leading-relaxed">
-                  At {libraryName}, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our library services.
-                </p>
-              </div>
+              At {libraryName}, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our library services.
+            </p>
+          </div>
 
           {/* Information We Collect */}
           <div>

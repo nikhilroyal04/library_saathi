@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { fetchLibraries, selectLibraries, findLibraryBySubdomainOrCustomDomain } from '@/lib/store/librarySlice';
 import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
 import { Mail, Phone, MapPin, Clock, Globe, MessageCircle } from 'lucide-react';
 import ContactForm from './contact-form';
@@ -23,8 +23,7 @@ export default function ContactPage({ params }: ContactPageProps) {
 
   const libraries = useSelector(selectLibraries);
   const selectedLibrary = useMemo(() => {
-    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
-    return libraries.find(lib => lib?.subdomain === subdomain);
+    return findLibraryBySubdomainOrCustomDomain(libraries, subdomain);
   }, [libraries, subdomain]);
 
   const libraryName = selectedLibrary?.name || `${subdomain} Library`;
@@ -125,7 +124,7 @@ export default function ContactPage({ params }: ContactPageProps) {
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <ContactForm />
+            <ContactForm params={params} />
           </div>
         </div>
       </section>

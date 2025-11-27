@@ -38,6 +38,7 @@ import ShiftsTab from './components/shifts-tab';
 import TestimonialTab from './components/testimonial-tab';
 import FaqsTab from './components/faqs-tab';
 import SeoTab from './components/seo-tab';
+import { findLibraryBySubdomainOrCustomDomain } from '@/lib/store/librarySlice';
 
 // Extend LibraryDetails to include all Library properties
 type ExtendedLibraryDetails = LibraryDetails & Partial<Library>;
@@ -61,14 +62,21 @@ export default function LibraryDetailsForm({
     dispatch(fetchLibraries() as any);
   }, [dispatch]);
 
-  // Get library from Redux by subdomain
+  // Get library from Redux by subdomain or customDomain
   const libraryData = useMemo(() => {
-    if (!libraries || !Array.isArray(libraries)) return null;
-    return libraries.find(lib => lib?.subdomain === subdomain);
+    return findLibraryBySubdomainOrCustomDomain(libraries, subdomain) || null;
   }, [libraries, subdomain]);
 
   // Use Redux data if available, otherwise use initialData
   const formData = libraryData || (initialData as ExtendedLibraryDetails);
+
+  // Get custom domain from formData or initialData (customDomain is stored in Redis)
+  const customDomain = initialData?.customDomain || '';
+  
+  // Determine website URL: use custom domain if available, otherwise use subdomain
+  const websiteUrl = customDomain 
+    ? `${protocol}://${customDomain}`
+    : `${protocol}://${subdomain}.${rootDomain}`;
 
   // Logo state
   const [logoPreview, setLogoPreview] = useState<string | null>(formData.logo || null);
@@ -99,12 +107,22 @@ export default function LibraryDetailsForm({
       const shifts: any[] = [];
       let shiftIndex = 0;
       while (formDataObj.get(`shifts[${shiftIndex}][name]`)) {
+        // Get status and validate it (backend only accepts 'active' or 'inactive')
+        const statusValue = formDataObj.get(`shifts[${shiftIndex}][status]`) as string || 'active';
+        const validStatus = (statusValue === 'active' || statusValue === 'inactive') 
+          ? statusValue 
+          : 'active'; // Default to 'active' if invalid value
+        
         shifts.push({
           name: formDataObj.get(`shifts[${shiftIndex}][name]`) as string,
           time: formDataObj.get(`shifts[${shiftIndex}][time]`) as string || '',
           icon: formDataObj.get(`shifts[${shiftIndex}][icon]`) as string || '',
           color: formDataObj.get(`shifts[${shiftIndex}][color]`) as string || '',
-          description: formDataObj.get(`shifts[${shiftIndex}][description]`) as string || ''
+          description: formDataObj.get(`shifts[${shiftIndex}][description]`) as string || '',
+          status: validStatus, // Ensure only valid enum values
+          capacity: formDataObj.get(`shifts[${shiftIndex}][capacity]`) as string || undefined,
+          staffCount: formDataObj.get(`shifts[${shiftIndex}][staffCount]`) ? parseInt(formDataObj.get(`shifts[${shiftIndex}][staffCount]`) as string) : undefined,
+          features: formDataObj.get(`shifts[${shiftIndex}][features]`) ? JSON.parse(formDataObj.get(`shifts[${shiftIndex}][features]`) as string) : undefined
         });
         shiftIndex++;
       }
@@ -162,13 +180,18 @@ export default function LibraryDetailsForm({
         galleryIndex++;
       }
 
-      // Get customDomain from form and ensure it's in FormData for Redis
-      const customDomain = formDataObj.get('customDomain') as string || (formData as ExtendedLibraryDetails).customDomain || initialData?.customDomain || '';
+      // Get customDomain from form (will be saved to both MongoDB and Redis)
+      const customDomainValue = (formDataObj.get('customDomain') as string || (formData as ExtendedLibraryDetails).customDomain || initialData?.customDomain || '').trim();
+      const customDomain = customDomainValue || undefined; // Convert empty string to undefined
+      
       if (customDomain) {
         formDataObj.set('customDomain', customDomain);
+      } else {
+        // If customDomain is empty, set it to empty string in FormData for Redis (to clear it)
+        formDataObj.set('customDomain', '');
       }
 
-      // Build library update object (customDomain is saved to Redis only, not Redux/MongoDB)
+      // Build library update object (customDomain is saved to both MongoDB and Redis)
       const updates: Partial<Library> = {
         name: formDataObj.get('name') as string || formData.name,
         description: formDataObj.get('description') as string || formData.description,
@@ -183,13 +206,27 @@ export default function LibraryDetailsForm({
         metaTitle: formDataObj.get('metaTitle') as string || formData.metaTitle,
         metaDescription: formDataObj.get('metaDescription') as string || formData.metaDescription,
         metaKeywords: formDataObj.get('metaKeywords') as string || formData.metaKeywords,
+        // Include customDomain in MongoDB update (only if it has a value)
+        customDomain: customDomain,
         about: {
           mission: formDataObj.get('mission') as string || formData.about?.mission,
           vision: formDataObj.get('vision') as string || formData.about?.vision,
           whyChooseUs: formData.about?.whyChooseUs || []
         },
         gallery: gallery.length > 0 ? gallery : formData.gallery || [],
-        shifts: shifts.length > 0 ? shifts.map((s: any) => ({ ...s, time: s.time || '' })) : formData.shifts || [],
+        shifts: shifts.length > 0 ? shifts.map((s: any) => { 
+          // Ensure status is valid enum value ('active' or 'inactive')
+          const validStatus = (s.status === 'active' || s.status === 'inactive') ? s.status : 'active';
+          return { 
+            ...s, 
+            time: s.time || '',
+            status: validStatus // Override with valid status
+          };
+        }) : (formData.shifts || []).map((s: any) => {
+          // Also validate existing shifts from formData
+          const validStatus = (s.status === 'active' || s.status === 'inactive') ? s.status : 'active';
+          return { ...s, status: validStatus };
+        }),
         facilities: facilities.length > 0 ? facilities : formData.facilities || [],
         testimonials: testimonials.length > 0 ? testimonials.map((t: any) => ({ ...t, text: t.text || '' })) : formData.testimonials || [],
         faqs: faqs.length > 0 ? faqs : formData.faqs || []
@@ -264,7 +301,7 @@ export default function LibraryDetailsForm({
               </div>
             </div>
             <a
-              href={`${protocol}://${subdomain}.${rootDomain}`}
+              href={websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-700 font-medium text-sm"
@@ -327,40 +364,40 @@ export default function LibraryDetailsForm({
 
           {/* Basic Tab */}
           <TabsContent value="basic">
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-                <CardDescription>Essential details about your library</CardDescription>
-              </CardHeader>
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic Information</CardTitle>
+            <CardDescription>Essential details about your library</CardDescription>
+          </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="name">Library Name *</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder="e.g., Central Library"
+              <Label htmlFor="name">Library Name *</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="e.g., Central Library"
                       defaultValue={formData.name}
-                      required
-                    />
-                  </div>
+                required
+              />
+            </div>
 
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="description">Description</Label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Tell visitors about your library..."
+              <Label htmlFor="description">Description</Label>
+              <textarea
+                id="description"
+                name="description"
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Tell visitors about your library..."
                       defaultValue={formData.description}
-                    />
-                  </div>
+              />
+            </div>
 
-                  <div className="space-y-2">
+            <div className="space-y-2">
                     <Label htmlFor="emoji">Emoji Icon</Label>
-                    <Input
+              <Input
                       id="emoji"
                       name="emoji"
                       type="text"
@@ -369,11 +406,11 @@ export default function LibraryDetailsForm({
                       maxLength={2}
                     />
                     <p className="text-xs text-gray-500">Single emoji to represent your library</p>
-                  </div>
+            </div>
 
-                  <div className="space-y-2">
+            <div className="space-y-2">
                     <Label htmlFor="topbar">Topbar Message</Label>
-                    <Input
+              <Input
                       id="topbar"
                       name="topbar"
                       type="text"
@@ -381,7 +418,7 @@ export default function LibraryDetailsForm({
                       defaultValue={formData.topbar}
                     />
                     <p className="text-xs text-gray-500">Message shown in top bar</p>
-                  </div>
+            </div>
 
                   <div className="space-y-2 md:col-span-2">
                     <Label>Logo</Label>
@@ -405,15 +442,15 @@ export default function LibraryDetailsForm({
                             <Upload className="w-4 h-4" />
                             Choose Logo
                           </Button>
-                          <Input
+              <Input
                             id="logo"
                             name="logo"
-                            type="url"
+                type="url"
                             placeholder="Or enter logo URL"
                             defaultValue={formData.logo}
                             onChange={(e) => setLogoPreview(e.target.value || null)}
-                          />
-                        </div>
+              />
+            </div>
                       </div>
                       {logoPreview && (
                         <div className="relative w-32 h-32 border rounded-lg overflow-hidden bg-gray-100">
@@ -437,9 +474,9 @@ export default function LibraryDetailsForm({
                       )}
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+            </div>
+          </CardContent>
+        </Card>
           </TabsContent>
 
           {/* Contact Tab */}
@@ -484,48 +521,48 @@ export default function LibraryDetailsForm({
 
           {/* Custom Domain Tab */}
           <TabsContent value="custom-domain">
-            <Card className="border-blue-200 bg-blue-50/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-blue-600" />
-                  Custom Domain
-                </CardTitle>
-                <CardDescription>
-                  Connect your own domain (e.g., tenant.vikrantrathi.com). This will point to your subdomain.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="customDomain">Custom Domain</Label>
-                  <Input
-                    id="customDomain"
-                    name="customDomain"
-                    type="text"
-                    placeholder="tenant.vikrantrathi.com"
-                    defaultValue={initialData.customDomain}
-                  />
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-blue-600" />
+              Custom Domain
+            </CardTitle>
+            <CardDescription>
+              Connect your own domain (e.g., tenant.vikrantrathi.com). This will point to your subdomain.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="customDomain">Custom Domain</Label>
+              <Input
+                id="customDomain"
+                name="customDomain"
+                type="text"
+                placeholder="tenant.vikrantrathi.com"
+                defaultValue={initialData.customDomain}
+              />
                   <div className="space-y-2 text-xs text-gray-600 mt-4">
-                    <p className="font-medium">Steps to setup custom domain:</p>
-                    <ol className="list-decimal list-inside space-y-1 ml-2">
-                      <li>Enter your custom domain above (without http:// or https://)</li>
-                      <li>Save this form</li>
-                      <li>Add CNAME record in your DNS provider:
-                        <br />
-                        <code className="text-xs bg-white px-2 py-1 rounded border mt-1 inline-block">
-                          {initialData.customDomain || 'tenant.vikrantrathi.com'} → CNAME → {subdomain}.{rootDomain}
-                        </code>
-                      </li>
-                      <li>If using Vercel, also add this domain in Vercel Dashboard → Settings → Domains</li>
-                      <li>Wait 5-60 minutes for DNS propagation</li>
-                    </ol>
-                    <p className="text-xs text-gray-500 mt-2">
+                <p className="font-medium">Steps to setup custom domain:</p>
+                <ol className="list-decimal list-inside space-y-1 ml-2">
+                  <li>Enter your custom domain above (without http:// or https://)</li>
+                  <li>Save this form</li>
+                  <li>Add CNAME record in your DNS provider:
+                    <br />
+                    <code className="text-xs bg-white px-2 py-1 rounded border mt-1 inline-block">
+                      {initialData.customDomain || 'tenant.vikrantrathi.com'} → CNAME → {subdomain}.{rootDomain}
+                    </code>
+                  </li>
+                  <li>If using Vercel, also add this domain in Vercel Dashboard → Settings → Domains</li>
+                  <li>Wait 5-60 minutes for DNS propagation</li>
+                </ol>
+                <p className="text-xs text-gray-500 mt-2">
                       Example: If your custom domain is <code>tenant.vikrantrathi.com</code> and subdomain is <code>{subdomain}.{rootDomain}</code>,
                       add CNAME: <code>tenant.vikrantrathi.com → {subdomain}.{rootDomain}</code>
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
           </TabsContent>
         </Tabs>
 

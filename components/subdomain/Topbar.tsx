@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { fetchLibraries, selectLibraries, findLibraryBySubdomainOrCustomDomain } from '@/lib/store/librarySlice';
 import { usePathname } from 'next/navigation';
 
 
@@ -27,8 +27,8 @@ const Topbar = () => {
 
   const libraries = useSelector(selectLibraries);
   const selectedLibrary = useMemo(() => {
-    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
-    return libraries.find(lib => lib?.subdomain === subdomain);
+    if (!subdomain) return undefined;
+    return findLibraryBySubdomainOrCustomDomain(libraries, subdomain);
   }, [libraries, subdomain]);
 
   // Use library topbar message if available, otherwise use default

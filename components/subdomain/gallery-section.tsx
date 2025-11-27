@@ -141,7 +141,7 @@ const GallerySection = ({ galleryItems: propGalleryItems }: GallerySectionProps)
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                </div>
+                    </div>
               ) : (
                 <div className={`w-full h-48 ${colors.bg} flex items-center justify-center`}>
                   <span className="text-6xl">{item.icon || '📚'}</span>
@@ -149,8 +149,8 @@ const GallerySection = ({ galleryItems: propGalleryItems }: GallerySectionProps)
               )}
               <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {item.title}
-                </h3>
+                      {item.title}
+                    </h3>
                 {item.description && (
                   <p className="text-sm text-gray-600 leading-relaxed">
                     {item.description}

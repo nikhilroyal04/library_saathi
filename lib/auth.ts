@@ -3,7 +3,7 @@ import { redis } from './redis';
 
 // Demo credentials - replace with real authentication later
 export const DEMO_CREDENTIALS = {
-  email: 'admin@librarysaathi.com',
+  email: 'admin@librarysaathi.in',
   password: 'admin123',
   subdomain: 'admin' // Default admin subdomain
 };

@@ -45,7 +45,7 @@ export default function LoginForm() {
               id="email"
               name="email"
               type="email"
-              placeholder="admin@librarysaathi.com"
+              placeholder="admin@librarysaathi.in"
               required
               disabled={isPending}
               className="w-full"
@@ -81,7 +81,7 @@ export default function LoginForm() {
 
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Demo Credentials:</p>
-            <p className="text-xs text-blue-600 dark:text-blue-400">Email: admin@librarysaathi.com</p>
+            <p className="text-xs text-blue-600 dark:text-blue-400">Email: admin@librarysaathi.in</p>
             <p className="text-xs text-blue-600 dark:text-blue-400">Password: admin123</p>
           </div>
         </form>

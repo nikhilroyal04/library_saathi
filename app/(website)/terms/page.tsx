@@ -101,7 +101,7 @@ export default function TermsPage() {
                 If you have any questions about these Terms and Conditions, please contact us at:
               </p>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-2">
-                Email: legal@librarysaathi.com
+                Email: legal@librarysaathi.in
               </p>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Phone: +91 1234567890

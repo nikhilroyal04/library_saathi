@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { protocol, rootDomain } from '@/lib/utils';
-import { BookOpen, Mail, Phone, Calendar, Clock, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { BookOpen, Phone, Calendar, Clock, User, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { createLead, selectLoading, selectError } from '@/lib/store/leadSlice';
 
 type LibraryDetails = {
   name?: string;
@@ -23,6 +24,10 @@ type HeroSectionProps = {
 };
 
 const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => {
+  const dispatch = useDispatch();
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,16 +36,61 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
     additionalInformation: ''
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Auto-hide success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      console.log('Form submitted:', formData);
-      alert('Thank you for your booking request! We will contact you shortly.');
+    try {
+      // Get default product ID (you can configure this or fetch from API)
+      // For now, using a default - you may want to fetch from library's license
+      const defaultProductId = process.env.NEXT_PUBLIC_DEFAULT_PRODUCT_ID || '';
+      
+      if (!defaultProductId) {
+        toast.error('Product configuration missing. Please contact support.');
+        console.error('NEXT_PUBLIC_DEFAULT_PRODUCT_ID is not set in environment variables');
+        return;
+      }
+
+      // Validate required fields
+      if (!formData.name || !formData.phone || !formData.startDate) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+
+      // Prepare lead data with all dynamic fields
+      const leadData = {
+        subdomain: subdomain,
+        product: defaultProductId,
+        // All form fields as dynamic fields
+        name: formData.name,
+        email: formData.email || undefined,
+        phone: formData.phone,
+        startDate: formData.startDate,
+        additionalInformation: formData.additionalInformation || undefined,
+        formType: 'booking', // To identify which form this came from
+        source: 'hero-section'
+      };
+
+      console.log('Submitting lead data:', leadData);
+
+      // Submit using Redux dispatch
+      const result = await dispatch(createLead(leadData) as any);
+
+      console.log('Lead creation result:', result);
+
+      if (result && result.success) {
+        setSuccessMessage('Thank you for your booking request! We will contact you shortly.');
       setFormData({
         name: '',
         email: '',
@@ -48,8 +98,16 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
         startDate: '',
         additionalInformation: ''
       });
-      setIsSubmitting(false);
-    }, 1000);
+      } else {
+        const errorMsg = result?.error || error || 'Failed to submit booking request';
+        toast.error(errorMsg);
+        console.error('Lead creation failed:', errorMsg);
+      }
+    } catch (error: any) {
+      console.error('Error submitting form:', error);
+      const errorMsg = error?.response?.data?.message || error?.message || 'Failed to submit booking request. Please try again.';
+      toast.error(errorMsg);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -201,12 +259,27 @@ const HeroSection = ({ libraryDetails, subdomain, emoji }: HeroSectionProps) => 
                   />
                 </div>
 
+                {/* Success Message */}
+                {successMessage && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700 text-sm">
+                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                    <span>{successMessage}</span>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-3 px-5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-3 px-5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? 'Submitting...' : 'Book Now'}
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    'Book Now'
+                  )}
                 </button>
               </form>
             </div>

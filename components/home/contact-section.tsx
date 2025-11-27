@@ -30,8 +30,8 @@ const ContactSection = () => {
     {
       icon: '📧',
       title: 'Email Us',
-      content: 'support@librarysaathi.com',
-      link: 'mailto:support@librarysaathi.com',
+      content: 'support@librarysaathi.in',
+      link: 'mailto:support@librarysaathi.in',
       gradient: 'from-blue-500 to-cyan-500'
     },
     {

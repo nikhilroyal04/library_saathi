@@ -334,8 +334,8 @@ const BookNow = () => {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Send us an email anytime
               </p>
-              <a href="mailto:support@librarysaathi.com" className="text-blue-600 dark:text-blue-400 font-semibold">
-                support@librarysaathi.com
+              <a href="mailto:support@librarysaathi.in" className="text-blue-600 dark:text-blue-400 font-semibold">
+                support@librarysaathi.in
               </a>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl">

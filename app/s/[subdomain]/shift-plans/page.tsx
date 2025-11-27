@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { fetchLibraries, selectLibraries, findLibraryBySubdomainOrCustomDomain } from '@/lib/store/librarySlice';
 import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
 import { Clock, Calendar, Users, RotateCcw, CheckCircle, AlertCircle } from 'lucide-react';
 import TestimonialSection from '@/components/subdomain/testimonial-section';
@@ -22,8 +22,7 @@ export default function ShiftPlansPage({ params }: ShiftPlansPageProps) {
 
   const libraries = useSelector(selectLibraries);
   const selectedLibrary = useMemo(() => {
-    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
-    return libraries.find(lib => lib?.subdomain === subdomain);
+    return findLibraryBySubdomainOrCustomDomain(libraries, subdomain);
   }, [libraries, subdomain]);
 
   const libraryName = selectedLibrary?.name || `${subdomain} Library`;

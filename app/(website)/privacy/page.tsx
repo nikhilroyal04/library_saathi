@@ -109,7 +109,7 @@ export default function PrivacyPolicyPage() {
                 If you have any questions about this Privacy Policy, please contact us at:
               </p>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-2">
-                Email: privacy@librarysaathi.com
+                Email: privacy@librarysaathi.in
               </p>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Phone: +91 1234567890

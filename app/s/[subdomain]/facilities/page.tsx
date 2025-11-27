@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { fetchLibraries, selectLibraries, findLibraryBySubdomainOrCustomDomain } from '@/lib/store/librarySlice';
 import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
 import { BookOpen, Wifi, Monitor, Users, Coffee, Calendar, Printer, Headphones } from 'lucide-react';
 import TestimonialSection from '@/components/subdomain/testimonial-section';
@@ -22,8 +22,7 @@ export default function FacilitiesPage({ params }: FacilitiesPageProps) {
 
   const libraries = useSelector(selectLibraries);
   const selectedLibrary = useMemo(() => {
-    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
-    return libraries.find(lib => lib?.subdomain === subdomain);
+    return findLibraryBySubdomainOrCustomDomain(libraries, subdomain);
   }, [libraries, subdomain]);
 
   // Default facilities if no data provided
@@ -143,18 +142,18 @@ export default function FacilitiesPage({ params }: FacilitiesPageProps) {
                 key={index}
                 className={`p-6 bg-white rounded-lg border ${colors.border} hover:border-blue-300 hover:shadow-md transition-all duration-200`}
               >
-                {/* Icon */}
+                  {/* Icon */}
                 <div className={`w-12 h-12 ${colors.bg} rounded-lg flex items-center justify-center mb-4`}>
                   <Icon className={`w-6 h-6 ${colors.icon}`} />
-                </div>
+                  </div>
 
-                {/* Content */}
+                  {/* Content */}
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {facility.name}
-                </h3>
+                    {facility.name}
+                  </h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  {facility.description}
-                </p>
+                    {facility.description}
+                  </p>
               </div>
             );
           })}

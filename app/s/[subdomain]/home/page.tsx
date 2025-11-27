@@ -1,6 +1,6 @@
 'use client';
 
-import { fetchLibraries, selectLibraries } from '@/lib/store/librarySlice';
+import { fetchLibraries, selectLibraries, findLibraryBySubdomainOrCustomDomain } from '@/lib/store/librarySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo } from 'react';
 import { useSubdomainParams } from '@/lib/hooks/useSubdomainParams';
@@ -23,10 +23,9 @@ export default function HomePage({ params }: HomePageProps) {
   }, [dispatch]);
 
   const libraries = useSelector(selectLibraries);
-  // params.subdomain se related library dhundh ke details bhejo
+  // params.subdomain se related library dhundh ke details bhejo (subdomain ya customDomain se match)
   const selectedLibrary = useMemo(() => {
-    if (!libraries || !Array.isArray(libraries) || !subdomain) return undefined;
-    return libraries.find(lib => lib?.subdomain === subdomain);
+    return findLibraryBySubdomainOrCustomDomain(libraries, subdomain);
   }, [libraries, subdomain]);
 
   return (

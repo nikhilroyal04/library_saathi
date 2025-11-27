@@ -8,6 +8,7 @@ export interface Library {
   description?: string;
   logo?: string;
   subdomain: string;
+  customDomain?: string;
   emoji?: string;
   topbar?: string;
   email?: string;
@@ -155,6 +156,7 @@ function toLibraryFormData(library: any): FormData {
   const formData = new FormData();
   for (const key in library) {
     const value = library[key];
+    // Skip undefined and null, but allow empty strings (especially for customDomain)
     if (value === undefined || value === null) continue;
 
     // Handle File/Image type 'logo' or 'image' fields if present
@@ -167,7 +169,10 @@ function toLibraryFormData(library: any): FormData {
     if (typeof value === 'object' && !(value instanceof File) && !(value instanceof Blob)) {
       formData.append(key, JSON.stringify(value));
     } else {
-      formData.append(key, value);
+      // Include empty strings for customDomain to allow clearing it
+      if (key === 'customDomain' || value !== '') {
+        formData.append(key, value);
+      }
     }
   }
   return formData;
@@ -251,5 +256,33 @@ export const {
 export const selectLibraries = (state: RootState) => state.library.libraries;
 export const selectLoading = (state: RootState) => state.library.loading;
 export const selectError = (state: RootState) => state.library.error;
+
+/**
+ * Helper function to find a library by subdomain or customDomain
+ * This allows matching libraries by either their subdomain or custom domain
+ */
+export const findLibraryBySubdomainOrCustomDomain = (
+  libraries: Library[] | null,
+  identifier: string
+): Library | undefined => {
+  if (!libraries || !Array.isArray(libraries) || !identifier) return undefined;
+  
+  // Normalize identifier for comparison
+  const normalizedIdentifier = identifier.toLowerCase().trim();
+  
+  // First check if it matches a subdomain
+  let found = libraries.find(lib => 
+    lib?.subdomain?.toLowerCase().trim() === normalizedIdentifier
+  );
+  
+  // If not found, check if it matches a customDomain
+  if (!found) {
+    found = libraries.find(lib => 
+      lib?.customDomain?.toLowerCase().trim() === normalizedIdentifier
+    );
+  }
+  
+  return found;
+};
 
 export default librarySlice.reducer;

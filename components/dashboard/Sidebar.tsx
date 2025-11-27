@@ -6,7 +6,6 @@ import {
   LayoutDashboard, 
   Globe, 
   Settings, 
-  TrendingUp,
   Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,7 +13,6 @@ import { cn } from '@/lib/utils';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Subdomains', href: '/dashboard/subdomains', icon: Globe },
-  { name: 'Leads', href: '/dashboard/leads', icon: TrendingUp },
   { name: 'Library Leads', href: '/dashboard/library-leads', icon: Users }, 
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
